@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESCAP — Doctolib Connect</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; height: 100vh; overflow: hidden; }
+
+  /* ── Doctolib shell ── */
+  .nav-bar {
+    width: 72px; background: #0c2340; display: flex; flex-direction: column;
+    align-items: center; padding: 12px 0; gap: 4px; flex-shrink: 0;
+  }
+  .nav-logo { width: 36px; height: 36px; margin-bottom: 16px; }
+  .nav-item {
+    width: 48px; height: 48px; border-radius: 12px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; cursor: pointer; color: rgba(255,255,255,0.5);
+    font-size: 9px; gap: 3px; transition: background 0.15s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); }
+  .nav-item.active { background: rgba(255,255,255,0.12); color: #fff; }
+  .nav-item svg { width: 20px; height: 20px; }
+  .nav-badge {
+    position: relative;
+  }
+  .badge {
+    position: absolute; top: -2px; right: -2px; background: #e53935; color: #fff;
+    font-size: 9px; font-weight: 700; border-radius: 8px; padding: 1px 4px; line-height: 1.4;
+  }
+
+  /* ── Calendar area (background) ── */
+  .calendar-area {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .top-bar {
+    height: 56px; background: #fff; border-bottom: 1px solid #e8eaed;
+    display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0;
+  }
+  .top-bar-search {
+    flex: 1; max-width: 360px; height: 36px; background: #f0f2f5; border-radius: 8px;
+    display: flex; align-items: center; padding: 0 12px; gap: 8px; color: #6b7280; font-size: 13px;
+  }
+  .calendar-body { flex: 1; background: #f8f9fa; position: relative; }
+
+  /* ── Connect panel ── */
+  .connect-panel {
+    width: 360px; background: #fff; border-left: 1px solid #e8eaed;
+    display: flex; flex-direction: column; flex-shrink: 0; height: 100%;
+  }
+
+  /* Panel header */
+  .panel-header {
+    padding: 12px 16px 8px; border-bottom: 1px solid #f0f0f0; flex-shrink: 0;
+  }
+  .panel-title-row {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+  }
+  .panel-title { font-size: 15px; font-weight: 600; color: #0c2340; display: flex; align-items: center; gap: 6px; }
+  .panel-icons { display: flex; gap: 4px; }
+  .icon-btn {
+    width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; color: #6b7280;
+  }
+  .icon-btn:hover { background: #f0f2f5; }
+  .panel-search {
+    height: 32px; background: #f0f2f5; border-radius: 8px; border: none;
+    width: 100%; padding: 0 10px 0 30px; font-size: 12px; color: #374151; outline: none;
+  }
+  .search-wrap { position: relative; }
+  .search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: #9ca3af; }
+  .pills { display: flex; gap: 6px; margin-top: 8px; }
+  .pill {
+    height: 26px; border-radius: 13px; border: 1px solid #e5e7eb; padding: 0 10px;
+    font-size: 11px; font-weight: 500; cursor: pointer; background: #fff; color: #374151;
+    display: flex; align-items: center;
+  }
+  .pill.active { background: #0c2340; color: #fff; border-color: #0c2340; }
+
+  /* Channel list */
+  .channel-list { flex: 1; overflow-y: auto; }
+  .channel-item {
+    display: flex; align-items: center; padding: 10px 16px; gap: 10px;
+    cursor: pointer; border-bottom: 1px solid #f9fafb; transition: background 0.1s;
+  }
+  .channel-item:hover { background: #f8f9ff; }
+  .channel-item.active { background: #eef2ff; }
+  .channel-avatar {
+    width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; font-size: 18px;
+  }
+  .channel-info { flex: 1; min-width: 0; }
+  .channel-name { font-size: 13px; font-weight: 600; color: #111827; }
+  .channel-preview { font-size: 11px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+  .channel-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+  .channel-time { font-size: 10px; color: #9ca3af; }
+  .unread-dot { width: 16px; height: 16px; background: #e53935; border-radius: 8px; font-size: 9px; font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; }
+
+  .fab {
+    position: absolute; bottom: 16px; right: 16px;
+    height: 36px; background: #0066cc; color: #fff; border: none; border-radius: 18px;
+    padding: 0 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,102,204,0.35);
+  }
+
+  /* ── ESCAP Form panel (overlays connect panel) ── */
+  .escap-overlay {
+    position: absolute; inset: 0; background: #fff; display: flex; flex-direction: column;
+    transition: transform 0.25s ease; z-index: 10;
+  }
+  .escap-overlay.hidden { transform: translateX(100%); }
+
+  .escap-header {
+    background: #0c2340; padding: 14px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .back-btn {
+    width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.1);
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.18); }
+  .escap-title { color: #fff; font-size: 14px; font-weight: 600; }
+  .escap-subtitle { color: rgba(255,255,255,0.6); font-size: 11px; margin-top: 1px; }
+
+  /* Score badge in header */
+  .score-badge {
+    margin-left: auto; background: rgba(255,255,255,0.12); border-radius: 10px;
+    padding: 4px 10px; text-align: center;
+  }
+  .score-num { font-size: 18px; font-weight: 700; color: #fff; line-height: 1; }
+  .score-label { font-size: 9px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .escap-body { flex: 1; overflow-y: auto; padding: 0 0 80px; }
+
+  /* Patient info card */
+  .info-card {
+    background: #f8faff; border-bottom: 1px solid #e8eaed; padding: 12px 16px;
+  }
+  .info-card-title { font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .info-field { }
+  .info-field.full { grid-column: 1 / -1; }
+  .info-field label { font-size: 10px; color: #9ca3af; display: block; margin-bottom: 2px; }
+  .info-field input, .info-field select {
+    width: 100%; height: 30px; border: 1px solid #e5e7eb; border-radius: 6px;
+    padding: 0 8px; font-size: 12px; color: #111827; background: #fff; outline: none;
+  }
+  .info-field input:focus, .info-field select:focus { border-color: #0066cc; box-shadow: 0 0 0 2px rgba(0,102,204,0.1); }
+  .ald-toggle { display: flex; gap: 6px; }
+  .toggle-btn {
+    flex: 1; height: 30px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff;
+    font-size: 12px; cursor: pointer; font-weight: 500; color: #374151;
+  }
+  .toggle-btn.active-yes { background: #dcfce7; border-color: #16a34a; color: #166534; }
+  .toggle-btn.active-no { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+
+  /* Section */
+  .section { padding: 12px 16px 4px; }
+  .section-title {
+    font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase;
+    letter-spacing: 0.6px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: #f0f0f0; }
+
+  /* Prerequisites */
+  .prereq-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px; background: #f9fafb; border-radius: 8px; margin-bottom: 6px;
+    border: 1px solid #f0f0f0;
+  }
+  .prereq-text { font-size: 12px; color: #374151; flex: 1; padding-right: 8px; line-height: 1.3; }
+  .yn-toggle { display: flex; gap: 4px; }
+  .yn-btn {
+    width: 32px; height: 24px; border-radius: 5px; border: 1px solid #e5e7eb;
+    background: #fff; font-size: 11px; font-weight: 600; cursor: pointer; color: #6b7280;
+  }
+  .yn-btn.yes.selected { background: #dcfce7; border-color: #16a34a; color: #166534; }
+  .yn-btn.no.selected { background: #f3f4f6; border-color: #9ca3af; color: #374151; }
+
+  /* Score rows */
+  .score-row {
+    padding: 8px 10px; background: #f9fafb; border-radius: 8px; margin-bottom: 6px;
+    border: 1px solid #f0f0f0;
+  }
+  .score-row-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; gap: 8px; }
+  .score-row-label { font-size: 12px; font-weight: 500; color: #111827; line-height: 1.3; }
+  .score-row-label small { font-weight: 400; color: #6b7280; font-size: 11px; }
+  .row-score-badge {
+    flex-shrink: 0; min-width: 24px; height: 22px; border-radius: 6px;
+    font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    background: #f3f4f6; color: #9ca3af; transition: all 0.15s;
+  }
+  .row-score-badge.scored { background: #0066cc; color: #fff; }
+  .score-options { display: flex; gap: 4px; }
+  .score-option {
+    flex: 1; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff;
+    padding: 5px 4px; cursor: pointer; text-align: center; transition: all 0.12s;
+  }
+  .score-option:hover { border-color: #0066cc; background: #f0f6ff; }
+  .score-option.selected { border-color: #0066cc; background: #0066cc; color: #fff; }
+  .score-option.selected .opt-val { color: #fff; }
+  .score-option.selected .opt-label { color: rgba(255,255,255,0.8); }
+  .opt-val { font-size: 13px; font-weight: 700; color: #0066cc; display: block; line-height: 1; margin-bottom: 2px; }
+  .opt-label { font-size: 9px; color: #6b7280; line-height: 1.2; display: block; }
+
+  /* Result bar */
+  .result-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #fff; border-top: 1px solid #e8eaed; padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .result-pill {
+    flex: 1; height: 44px; border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; gap: 8px; font-size: 13px; font-weight: 600;
+    transition: all 0.3s;
+  }
+  .result-pill.neutral { background: #f3f4f6; color: #6b7280; }
+  .result-pill.needed { background: #fef3c7; color: #92400e; }
+  .result-pill.required { background: #fee2e2; color: #991b1b; }
+  .result-pill.ok { background: #dcfce7; color: #166534; }
+  .send-btn {
+    height: 44px; background: #0066cc; color: #fff; border: none; border-radius: 10px;
+    padding: 0 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .send-btn:hover { background: #0055aa; }
+  .send-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+  /* Progress bar */
+  .progress-bar { height: 3px; background: #f0f0f0; flex-shrink: 0; }
+  .progress-fill { height: 100%; background: #0066cc; transition: width 0.3s; border-radius: 0 2px 2px 0; }
+
+  /* Scrollbar */
+  .escap-body::-webkit-scrollbar { width: 4px; }
+  .escap-body::-webkit-scrollbar-track { background: transparent; }
+  .escap-body::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
+
+  /* Pregnancy row hidden by default */
+  .pregnancy-row { display: none; }
+  .pregnancy-row.visible { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Doctolib nav -->
+<div class="nav-bar">
+  <svg class="nav-logo" viewBox="0 0 36 36" fill="none">
+    <rect width="36" height="36" rx="8" fill="white"/>
+    <text x="18" y="25" text-anchor="middle" font-size="18" font-weight="900" fill="#0c2340" font-family="sans-serif">D</text>
+  </svg>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>Agenda</span>
+  </div>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    <span>Tâches</span>
+  </div>
+  <div class="nav-item active nav-badge">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <span>Connect</span>
+    <div class="badge">2</div>
+  </div>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+    <span>Patients</span>
+  </div>
+</div>
+
+<!-- Calendar background -->
+<div class="calendar-area">
+  <div class="top-bar">
+    <div class="top-bar-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Rechercher un patient
+    </div>
+  </div>
+  <div class="calendar-body" style="background: repeating-linear-gradient(180deg, #fff 0px, #fff 59px, #f0f2f5 59px, #f0f2f5 60px); padding: 20px;">
+    <div style="color: #d1d5db; text-align: center; padding-top: 80px; font-size: 14px;">Agenda — Jeudi 4 Février 2023</div>
+  </div>
+</div>
+
+<!-- Connect panel -->
+<div class="connect-panel">
+  <div class="panel-header">
+    <div class="panel-title-row">
+      <div class="panel-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Chats <span style="background:#e53935;color:#fff;font-size:10px;border-radius:8px;padding:1px 5px;font-weight:700;">2</span>
+      </div>
+      <div class="panel-icons">
+        <button class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <button class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="panel-search" type="text" placeholder="Rechercher">
+    </div>
+    <div class="pills">
+      <div class="pill active">Tous</div>
+      <div class="pill">Non lus</div>
+      <div class="pill">Favoris</div>
+    </div>
+  </div>
+
+  <div class="channel-list" style="position:relative;">
+    <!-- Channels -->
+    <div class="channel-item" onclick="openEscap()">
+      <div class="channel-avatar" style="background:#fff3e0;">📢</div>
+      <div class="channel-info">
+        <div class="channel-name">#Annonces</div>
+        <div class="channel-preview">Nouvelles mises à jour du protocole…</div>
+      </div>
+      <div class="channel-meta">
+        <div class="channel-time">12:34</div>
+        <div class="unread-dot">1</div>
+      </div>
+    </div>
+    <div class="channel-item active" onclick="openEscap()">
+      <div class="channel-avatar" style="background:#e8f0fe;">🔗</div>
+      <div class="channel-info">
+        <div class="channel-name">#Coordination soins</div>
+        <div class="channel-preview">Dr. Martin a partagé une grille ESCAP</div>
+      </div>
+      <div class="channel-meta">
+        <div class="channel-time">11:52</div>
+        <div class="unread-dot">1</div>
+      </div>
+    </div>
+    <div class="channel-item">
+      <div class="channel-avatar" style="background:#fce4e4;">⚠️</div>
+      <div class="channel-info">
+        <div class="channel-name">#Urgent</div>
+        <div class="channel-preview">Revoyez les messages urgents…</div>
+      </div>
+      <div class="channel-meta">
+        <div class="channel-time">09:15</div>
+      </div>
+    </div>
+    <div class="channel-item">
+      <div class="channel-avatar" style="background:#f3e8ff;">🌿</div>
+      <div class="channel-info">
+        <div class="channel-name">#Fun</div>
+        <div class="channel-preview">Partagez vos questions…</div>
+      </div>
+      <div class="channel-meta">
+        <div class="channel-time">Hier</div>
+      </div>
+    </div>
+
+    <div style="padding: 16px; text-align: center; color: #9ca3af; font-size: 11px;">
+      Cliquer sur un channel pour voir le formulaire ESCAP →
+    </div>
+
+    <!-- FAB -->
+    <button class="fab" onclick="openEscap()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouveau
+    </button>
+
+    <!-- ESCAP overlay -->
+    <div class="escap-overlay hidden" id="escapOverlay">
+      <!-- Header -->
+      <div class="escap-header">
+        <button class="back-btn" onclick="closeEscap()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div>
+          <div class="escap-title">Grille ESCAP</div>
+          <div class="escap-subtitle">Évaluation du besoin de coordination</div>
+        </div>
+        <div class="score-badge">
+          <div class="score-num" id="scoreDisplay">—</div>
+          <div class="score-label">/ <span id="scoreMax">26</span> pts</div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+
+      <div class="escap-body" id="escapBody">
+
+        <!-- Patient info -->
+        <div class="info-card">
+          <div class="info-card-title">Informations patient</div>
+          <div class="info-grid">
+            <div class="info-field">
+              <label>Nom</label>
+              <input type="text" placeholder="Dupont" oninput="updateProgress()">
+            </div>
+            <div class="info-field">
+              <label>Prénom</label>
+              <input type="text" placeholder="Jean" oninput="updateProgress()">
+            </div>
+            <div class="info-field">
+              <label>Date de naissance</label>
+              <input type="date" oninput="updateProgress()">
+            </div>
+            <div class="info-field">
+              <label>Sexe</label>
+              <select id="sexeField" onchange="updateSexe()">
+                <option value="">— Choisir —</option>
+                <option value="M">Masculin</option>
+                <option value="F">Féminin</option>
+                <option value="NB">Non-binaire</option>
+              </select>
+            </div>
+            <div class="info-field">
+              <label>Poids (kg)</label>
+              <input type="number" placeholder="70" oninput="updateProgress()">
+            </div>
+            <div class="info-field">
+              <label>Taille (cm)</label>
+              <input type="number" placeholder="170" oninput="updateProgress()">
+            </div>
+            <div class="info-field full">
+              <label>ALD (Affection Longue Durée)</label>
+              <div class="ald-toggle">
+                <button class="toggle-btn" id="aldYes" onclick="setALD('oui')">Oui</button>
+                <button class="toggle-btn" id="aldNo" onclick="setALD('non')">Non</button>
+              </div>
+            </div>
+            <div class="info-field">
+              <label>Date d'évaluation</label>
+              <input type="date" id="evalDate" oninput="updateProgress()">
+            </div>
+            <div class="info-field">
+              <label>Profession évaluateur</label>
+              <input type="text" placeholder="Médecin généraliste" oninput="updateProgress()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Prerequisites -->
+        <div class="section">
+          <div class="section-title">Prérequis d'éligibilité</div>
+
+          <div class="prereq-item">
+            <div class="prereq-text">Patients diabétiques sous insuline</div>
+            <div class="yn-toggle">
+              <button class="yn-btn yes" onclick="setPrereq(this, 'p1', 'oui')">Oui</button>
+              <button class="yn-btn no" onclick="setPrereq(this, 'p1', 'non')">Non</button>
+            </div>
+          </div>
+          <div class="prereq-item">
+            <div class="prereq-text">Patients ayant fait un AVC post-hospitalisation</div>
+            <div class="yn-toggle">
+              <button class="yn-btn yes" onclick="setPrereq(this, 'p2', 'oui')">Oui</button>
+              <button class="yn-btn no" onclick="setPrereq(this, 'p2', 'non')">Non</button>
+            </div>
+          </div>
+          <div class="prereq-item">
+            <div class="prereq-text">Patients en soins palliatifs</div>
+            <div class="yn-toggle">
+              <button class="yn-btn yes" onclick="setPrereq(this, 'p3', 'oui')">Oui</button>
+              <button class="yn-btn no" onclick="setPrereq(this, 'p3', 'non')">Non</button>
+            </div>
+          </div>
+          <div class="prereq-item">
+            <div class="prereq-text">Patients polypathologiques chroniques de plus de 65 ans</div>
+            <div class="yn-toggle">
+              <button class="yn-btn yes" onclick="setPrereq(this, 'p4', 'oui')">Oui</button>
+              <button class="yn-btn no" onclick="setPrereq(this, 'p4', 'non')">Non</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scoring grid -->
+        <div class="section">
+          <div class="section-title">Grille de score</div>
+
+          <!-- Intervenants -->
+          <div class="score-row">
+            <div class="score-row-label">Nombre d'intervenants PS</div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_interv',0)">
+                <span class="opt-val">0</span><span class="opt-label">1 intervenant</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_interv',1)">
+                <span class="opt-val">1</span><span class="opt-label">2 à 3</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_interv',2)">
+                <span class="opt-val">2</span><span class="opt-label">Plus de 3</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Âge -->
+          <div class="score-row">
+            <div class="score-row-label">Âge</div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_age',0)">
+                <span class="opt-val">0</span><span class="opt-label">16–65 ans</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_age',1)">
+                <span class="opt-val">1</span><span class="opt-label">65–75 ans</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_age',2)">
+                <span class="opt-val">2</span><span class="opt-label">&lt;16 ou &gt;75</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pathologies -->
+          <div class="score-row">
+            <div class="score-row-label">Nombre de pathologies</div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_patho',0)">
+                <span class="opt-val">0</span><span class="opt-label">1</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_patho',1)">
+                <span class="opt-val">1</span><span class="opt-label">2</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_patho',2)">
+                <span class="opt-val">2</span><span class="opt-label">Plus de 2</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Médicaments -->
+          <div class="score-row">
+            <div class="score-row-label">Médicaments <small>(y compris oxygène)</small></div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_meds',0)">
+                <span class="opt-val">0</span><span class="opt-label">0 à 3</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_meds',1)">
+                <span class="opt-val">1</span><span class="opt-label">4</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_meds',2)">
+                <span class="opt-val">2</span><span class="opt-label">5 ou plus</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hospitalisation -->
+          <div class="score-row">
+            <div class="score-row-label">Hospitalisation <small>(6 derniers mois)</small></div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_hospi',0)">
+                <span class="opt-val">0</span><span class="opt-label">Aucune</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_hospi',1)">
+                <span class="opt-val">1</span><span class="opt-label">1 hospi</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_hospi',2)">
+                <span class="opt-val">2</span><span class="opt-label">Plusieurs</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chirurgie -->
+          <div class="score-row">
+            <div class="score-row-label">Chirurgie <small>(12 derniers mois)</small></div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_chir',0)">
+                <span class="opt-val">0</span><span class="opt-label">Non</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_chir',1)">
+                <span class="opt-val">1</span><span class="opt-label">Oui</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grossesse (conditionnelle) -->
+          <div class="score-row pregnancy-row" id="pregnancyRow">
+            <div class="score-row-label">
+              Grossesse
+              <span style="display:inline-block;background:#fef3c7;color:#92400e;font-size:9px;font-weight:600;padding:1px 5px;border-radius:4px;margin-left:4px;">+2 pts max</span>
+            </div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_gross',0)">
+                <span class="opt-val">0</span><span class="opt-label">&gt;36 SA</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_gross',1)">
+                <span class="opt-val">1</span><span class="opt-label">32–36 SA</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_gross',2)">
+                <span class="opt-val">2</span><span class="opt-label">28–32 SA</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vulnérabilités -->
+          <div class="score-row">
+            <div class="score-row-label">Vulnérabilités <small>(addictions, précarité, état psy)</small></div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_vuln',0)">
+                <span class="opt-val">0</span><span class="opt-label">Aucune</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_vuln',1)">
+                <span class="opt-val">1</span><span class="opt-label">Une</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_vuln',2)">
+                <span class="opt-val">2</span><span class="opt-label">Plusieurs</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aide à domicile -->
+          <div class="score-row">
+            <div class="score-row-label">Aide à domicile</div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_aide',0)">
+                <span class="opt-val">0</span><span class="opt-label">Non</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_aide',1)">
+                <span class="opt-val">1</span><span class="opt-label">&lt;1h/j</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_aide',2)">
+                <span class="opt-val">2</span><span class="opt-label">&gt;1h/j</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobilité -->
+          <div class="score-row">
+            <div class="score-row-label">Mobilité <small>(se lever, marcher)</small></div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_mobi',0)">
+                <span class="opt-val">0</span><span class="opt-label">Indépendant</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_mobi',1)">
+                <span class="opt-val">1</span><span class="opt-label">Soutien</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_mobi',2)">
+                <span class="opt-val">2</span><span class="opt-label">Incapacité</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Continence -->
+          <div class="score-row">
+            <div class="score-row-label">Continence <small>(urinaire et/ou fécale)</small></div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_cont',0)">
+                <span class="opt-val">0</span><span class="opt-label">Continence</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_cont',1)">
+                <span class="opt-val">1</span><span class="opt-label">Occ.</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_cont',2)">
+                <span class="opt-val">2</span><span class="opt-label">Permanente</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Poids / Nutrition -->
+          <div class="score-row">
+            <div class="score-row-label">Poids / Nutrition</div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_poids',0)">
+                <span class="opt-val">0</span><span class="opt-label">Stable</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_poids',1)">
+                <span class="opt-val">1</span><span class="opt-label">Var. &gt;3kg</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_poids',2)">
+                <span class="opt-val">2</span><span class="opt-label">Dénutrition</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Troubles sensoriels -->
+          <div class="score-row">
+            <div class="score-row-label">Troubles sensoriels <small>(audition, vision, toucher)</small></div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_sens',0)">
+                <span class="opt-val">0</span><span class="opt-label">Aucun</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_sens',1)">
+                <span class="opt-val">1</span><span class="opt-label">Légers</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_sens',2)">
+                <span class="opt-val">2</span><span class="opt-label">Importants</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fonctions cognitives -->
+          <div class="score-row">
+            <div class="score-row-label">Fonctions cognitives / communication <small>(langage, mémoire, orientation)</small></div>
+            <div class="score-options">
+              <div class="score-option" onclick="selectScore(this,'s_cogn',0)">
+                <span class="opt-val">0</span><span class="opt-label">Normales</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_cogn',1)">
+                <span class="opt-val">1</span><span class="opt-label">Peu altérées</span>
+              </div>
+              <div class="score-option" onclick="selectScore(this,'s_cogn',2)">
+                <span class="opt-val">2</span><span class="opt-label">Altérées</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /section -->
+      </div><!-- /escap-body -->
+
+      <!-- Result bar -->
+      <div class="result-bar">
+        <div class="result-pill neutral" id="resultPill">
+          <span id="resultText">Remplir la grille</span>
+        </div>
+        <button class="send-btn" id="sendBtn" disabled onclick="submitForm()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Envoyer
+        </button>
+      </div>
+    </div><!-- /escap-overlay -->
+  </div><!-- /channel-list -->
+</div><!-- /connect-panel -->
+
+<script>
+  const scores = {};
+  const prereqs = {};
+  let aldValue = null;
+  let isPregnant = false;
+
+  // Add score badge to each score row on load
+  document.querySelectorAll('.score-row').forEach(row => {
+    const label = row.querySelector('.score-row-label');
+    const header = document.createElement('div');
+    header.className = 'score-row-header';
+    label.parentNode.insertBefore(header, label);
+    header.appendChild(label);
+    const badge = document.createElement('span');
+    badge.className = 'row-score-badge';
+    badge.textContent = '—';
+    header.appendChild(badge);
+  });
+
+  function openEscap() {
+    document.getElementById('escapOverlay').classList.remove('hidden');
+    // Set today's date
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('evalDate').value = today;
+    updateScore();
+  }
+
+  function closeEscap() {
+    document.getElementById('escapOverlay').classList.add('hidden');
+  }
+
+  function setALD(val) {
+    aldValue = val;
+    document.getElementById('aldYes').className = 'toggle-btn' + (val === 'oui' ? ' active-yes' : '');
+    document.getElementById('aldNo').className = 'toggle-btn' + (val === 'non' ? ' active-no' : '');
+    updateProgress();
+  }
+
+  function updateSexe() {
+    const sexe = document.getElementById('sexeField').value;
+    isPregnant = (sexe === 'F');
+    const pRow = document.getElementById('pregnancyRow');
+    if (isPregnant) {
+      pRow.classList.add('visible');
+    } else {
+      pRow.classList.remove('visible');
+      delete scores['s_gross'];
+    }
+    updateScore();
+  }
+
+  function setPrereq(btn, id, val) {
+    const parent = btn.closest('.yn-toggle');
+    parent.querySelectorAll('.yn-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    prereqs[id] = val;
+    updateProgress();
+  }
+
+  function selectScore(el, key, val) {
+    const parent = el.closest('.score-options');
+    parent.querySelectorAll('.score-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    scores[key] = val;
+    const badge = el.closest('.score-row').querySelector('.row-score-badge');
+    if (badge) {
+      badge.textContent = val;
+      badge.classList.add('scored');
+    }
+    updateScore();
+  }
+
+  function updateScore() {
+    const scoreKeys = ['s_interv','s_age','s_patho','s_meds','s_hospi','s_chir','s_vuln','s_aide','s_mobi','s_cont','s_poids','s_sens','s_cogn'];
+    if (isPregnant) scoreKeys.push('s_gross');
+
+    let total = 0;
+    let filled = 0;
+    scoreKeys.forEach(k => {
+      if (scores[k] !== undefined) {
+        total += scores[k];
+        filled++;
+      }
+    });
+
+    const maxScore = isPregnant ? 28 : 26;
+    const threshold = isPregnant ? 14 : 13;
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const scoreMax = document.getElementById('scoreMax');
+    const resultPill = document.getElementById('resultPill');
+    const resultText = document.getElementById('resultText');
+    const sendBtn = document.getElementById('sendBtn');
+
+    scoreMax.textContent = maxScore;
+
+    if (filled === 0) {
+      scoreDisplay.textContent = '—';
+      resultPill.className = 'result-pill neutral';
+      resultText.textContent = 'Remplir la grille';
+      sendBtn.disabled = true;
+      return;
+    }
+
+    scoreDisplay.textContent = total;
+
+    if (filled < scoreKeys.length) {
+      resultPill.className = 'result-pill neutral';
+      resultText.textContent = `${filled}/${scoreKeys.length} critères renseignés`;
+      sendBtn.disabled = true;
+    } else {
+      sendBtn.disabled = false;
+      if (total >= threshold) {
+        resultPill.className = 'result-pill required';
+        resultText.textContent = `⚠️ Coordination requise (${total}/${maxScore})`;
+      } else {
+        resultPill.className = 'result-pill ok';
+        resultText.textContent = `✓ Pas de coordination (${total}/${maxScore})`;
+      }
+    }
+
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const scoreKeys = ['s_interv','s_age','s_patho','s_meds','s_hospi','s_chir','s_vuln','s_aide','s_mobi','s_cont','s_poids','s_sens','s_cogn'];
+    if (isPregnant) scoreKeys.push('s_gross');
+    const prereqKeys = ['p1','p2','p3','p4'];
+
+    let done = 0;
+    const total = scoreKeys.length + prereqKeys.length + 3; // +3 for basic info
+    scoreKeys.forEach(k => { if (scores[k] !== undefined) done++; });
+    prereqKeys.forEach(k => { if (prereqs[k]) done++; });
+    if (aldValue) done++;
+    // crude text input check
+    const inputs = document.querySelectorAll('.info-field input[type="text"], .info-field input[type="date"]');
+    inputs.forEach(i => { if (i.value) done += 0.3; });
+
+    const pct = Math.min(100, Math.round((done / total) * 100));
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  function submitForm() {
+    const overlay = document.getElementById('escapOverlay');
+    const resultPill = document.getElementById('resultPill');
+    resultPill.innerHTML = '✓ Grille envoyée dans #Coordination soins';
+    resultPill.className = 'result-pill ok';
+    document.getElementById('sendBtn').disabled = true;
+    setTimeout(() => {
+      overlay.classList.add('hidden');
+    }, 2000);
+  }
+</script>
+
+</body>
+</html>
