@@ -1,0 +1,2062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doctolib — Connect / ESCAP Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ─── Reset ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ─── Design Tokens ─── */
+  :root {
+    --dtl-navy:        #1B2A4A;
+    --dtl-navy-light:  #243557;
+    --dtl-navy-hover:  #2D4068;
+    --dtl-navy-active: #1A3A6A;
+    --dtl-blue:        #0596DE;
+    --dtl-blue-dark:   #0080C5;
+    --dtl-blue-light:  #E8F4FD;
+    --dtl-green:       #00C48C;
+    --dtl-green-bar:   #2ECC71;
+    --dtl-success-bg:  #E8F5E9;
+    --dtl-success-border: #4CAF50;
+    --dtl-success-text: #2E7D32;
+    --dtl-warning-bg:  #FEF3C7;
+    --dtl-warning-text:#92400E;
+    --dtl-danger-bg:   #FEE2E2;
+    --dtl-danger-text: #991B1B;
+    --dtl-progress:    #0596DE;
+
+    --dtl-white:       #FFFFFF;
+    --dtl-gray-50:     #F7F8FA;
+    --dtl-gray-100:    #F0F2F5;
+    --dtl-gray-200:    #E4E7EB;
+    --dtl-gray-300:    #CDD1D8;
+    --dtl-gray-400:    #9BA3AE;
+    --dtl-gray-500:    #6B7280;
+    --dtl-gray-600:    #4B5563;
+    --dtl-gray-700:    #374151;
+    --dtl-gray-800:    #1F2937;
+
+    --sidebar-width:   76px;
+    --header-height:   52px;
+    --sub-sidebar-width: 230px;
+
+    --font-family:     'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-xs:         11px;
+    --font-sm:         13px;
+    --font-base:       14px;
+    --font-md:         15px;
+    --font-lg:         18px;
+    --font-xl:         22px;
+
+    --shadow-sm:       0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md:       0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-lg:       0 4px 12px rgba(0,0,0,0.1);
+    --shadow-xl:       0 20px 60px rgba(0,0,0,0.25);
+
+    --radius-sm:       4px;
+    --radius-md:       8px;
+    --radius-lg:       12px;
+    --radius-xl:       16px;
+    --radius-full:     9999px;
+    --border-color:    var(--dtl-gray-200);
+  }
+
+  body {
+    font-family: var(--font-family);
+    font-size: var(--font-base);
+    color: var(--dtl-gray-800);
+    background: var(--dtl-gray-50);
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ═══════════ MAIN SIDEBAR ═══════════ */
+  .sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: var(--sidebar-width);
+    background: var(--dtl-navy);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0; z-index: 110;
+    overflow-y: auto; overflow-x: hidden;
+  }
+  .sidebar-logo {
+    width: 100%; height: 52px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    text-decoration: none; cursor: pointer;
+  }
+  .sidebar-logo-icon {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sidebar-nav {
+    display: flex; flex-direction: column; align-items: center;
+    width: 100%; padding: 2px 0; gap: 0; flex: 1;
+  }
+  .sidebar-item {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 68px; padding: 7px 4px 5px; border-radius: var(--radius-md);
+    cursor: pointer; text-decoration: none;
+    color: rgba(255,255,255,0.65); position: relative;
+    transition: background 0.15s, color 0.15s; margin: 1px 0;
+  }
+  .sidebar-item:hover { background: var(--dtl-navy-hover); color: rgba(255,255,255,0.9); }
+  .sidebar-item.active { background: rgba(255,255,255,0.1); color: #fff; }
+  .sidebar-item svg { margin-bottom: 2px; flex-shrink: 0; }
+  .sidebar-item span { font-size: 9.5px; font-weight: 500; line-height: 1.2; text-align: center; white-space: normal; }
+  .sidebar-badge {
+    position: absolute; top: 1px; right: 0px;
+    min-width: 18px; height: 18px; background: var(--dtl-blue); color: white;
+    font-size: 9px; font-weight: 700; border-radius: var(--radius-full);
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 4px; border: 2px solid var(--dtl-navy);
+  }
+  .sidebar-spacer { flex: 1; }
+  .sidebar-bottom {
+    display: flex; flex-direction: column; align-items: center; gap: 8px; padding-bottom: 16px;
+  }
+  .sidebar-avatar-bottom {
+    width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white;
+  }
+
+  /* ═══════════ HEADER ═══════════ */
+  .header {
+    position: fixed; top: 0; left: var(--sidebar-width); right: 0;
+    height: var(--header-height); background: var(--dtl-navy);
+    border-bottom: none; display: flex; align-items: center;
+    padding: 0 16px; z-index: 100; gap: 8px;
+  }
+  .header-search {
+    flex: 0 1 520px; height: 36px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius-full); display: flex; align-items: center;
+    padding: 0 14px; gap: 8px; color: rgba(255,255,255,0.45); font-size: var(--font-sm); cursor: text;
+  }
+  .header-search svg { flex-shrink: 0; stroke: rgba(255,255,255,0.45); }
+  .header-shortcut {
+    display: inline-flex; align-items: center; gap: 2px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 4px; padding: 1px 5px; font-size: 10px;
+    color: rgba(255,255,255,0.4); margin-left: auto;
+  }
+  .header-actions { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+  .header-chip {
+    display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+    border: 1px solid rgba(255,255,255,0.18); border-radius: var(--radius-full);
+    font-size: var(--font-sm); color: rgba(255,255,255,0.85);
+    background: transparent; cursor: pointer; white-space: normal;
+  }
+  .header-chip:hover { background: rgba(255,255,255,0.08); }
+  .header-chip svg { stroke: rgba(255,255,255,0.7); }
+  .header-icon-btn {
+    width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+    border-radius: var(--radius-full); border: none; background: transparent;
+    color: rgba(255,255,255,0.6); cursor: pointer;
+  }
+  .header-icon-btn:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); }
+  .header-separator { width: 1px; height: 24px; background: rgba(255,255,255,0.15); margin: 0 4px; flex-shrink: 0; }
+  .header-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #2ECC71; color: #fff; font-weight: 700; font-size: 12px;
+    border: 2px solid rgba(255,255,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .header-locale { font-size: var(--font-sm); color: rgba(255,255,255,0.5); white-space: normal; cursor: pointer; }
+
+  /* ═══════════ SUB-SIDEBAR ═══════════ */
+  .sub-sidebar {
+    position: fixed; top: var(--header-height); left: var(--sidebar-width); bottom: 0;
+    width: var(--sub-sidebar-width); background: var(--dtl-white);
+    border-right: 1px solid var(--dtl-gray-200); padding: 20px 0; z-index: 80;
+  }
+  .sub-sidebar-title { font-size: 16px; font-weight: 700; color: var(--dtl-gray-800); padding: 0 20px; margin-bottom: 14px; }
+  .sub-sidebar-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 20px;
+    font-size: var(--font-base); color: var(--dtl-gray-600);
+    cursor: pointer; text-decoration: none;
+    border-left: 3px solid transparent; transition: all 0.15s;
+  }
+  .sub-sidebar-item:hover { background: var(--dtl-gray-50); color: var(--dtl-gray-800); }
+  .sub-sidebar-item.active { background: var(--dtl-blue-light); color: var(--dtl-blue); border-left-color: var(--dtl-blue); font-weight: 600; }
+  .sub-sidebar-tag {
+    font-size: 10px; font-weight: 600; color: var(--dtl-blue);
+    background: var(--dtl-blue-light); padding: 2px 6px;
+    border-radius: var(--radius-sm); margin-left: auto;
+  }
+
+  /* ═══════════ CONTENT AREA ═══════════ */
+  .content {
+    position: fixed; top: var(--header-height);
+    left: calc(var(--sidebar-width) + var(--sub-sidebar-width));
+    right: 0; bottom: 0; background: var(--dtl-white);
+    display: flex; flex-direction: row; z-index: 50;
+  }
+
+  /* Left panel: conversation list */
+  .conversation-list {
+    width: 340px; background: var(--dtl-white);
+    border-right: 1px solid var(--dtl-gray-200);
+    display: flex; flex-direction: column; position: relative;
+  }
+  .conversation-header { padding: 16px 16px 0; border-bottom: none; }
+  .conversation-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .conversation-title { font-size: 18px; font-weight: 700; color: var(--dtl-gray-800); }
+  .conversation-badge {
+    background: var(--dtl-blue); color: white;
+    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-full);
+  }
+  .conversation-menu-btn {
+    margin-left: auto; background: none; border: none;
+    color: var(--dtl-gray-400); cursor: pointer; padding: 4px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .conversation-search-container { padding: 0 16px 14px; }
+  .conversation-search-wrap {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%; padding: 8px 14px;
+    border: 1px solid var(--dtl-gray-200);
+    border-radius: var(--radius-full);
+    background: var(--dtl-gray-50);
+  }
+  .conversation-search-wrap svg { flex-shrink: 0; stroke: var(--dtl-gray-400); }
+  .conversation-search-wrap input {
+    flex: 1; border: none; background: transparent;
+    font-family: var(--font-family); font-size: 13px;
+    color: var(--dtl-gray-600); outline: none;
+  }
+  .filter-tabs {
+    display: flex; gap: 8px; padding: 12px 16px;
+    border-bottom: 1px solid var(--dtl-gray-200);
+  }
+  .filter-tab {
+    padding: 6px 14px; border-radius: var(--radius-full);
+    border: 1px solid var(--dtl-gray-200);
+    background: var(--dtl-white); color: var(--dtl-gray-600);
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: all 0.15s; white-space: normal; font-family: var(--font-family);
+  }
+  .filter-tab:hover { background: var(--dtl-gray-50); color: var(--dtl-gray-800); }
+  .filter-tab.active { background: var(--dtl-blue); color: white; border-color: var(--dtl-blue); }
+  .conversations-scroll { flex: 1; overflow-y: auto; padding: 0; }
+  .conversation-item {
+    display: flex; align-items: center; padding: 12px 12px;
+    border-bottom: 1px solid var(--dtl-gray-200);
+    cursor: pointer; transition: background 0.15s;
+    gap: 12px; position: relative;
+  }
+  .conversation-item:hover { background: var(--dtl-gray-50); }
+  .conversation-item.active { background: var(--dtl-blue-light); border-left: 3px solid var(--dtl-blue); padding-left: 9px;}
+  .conversation-avatar {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600; color: white; overflow: hidden;
+  }
+  .conversation-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .conversation-content { flex: 1; min-width: 0; }
+  .conversation-names {
+    font-size: 14px; font-weight: 600; color: var(--dtl-gray-800);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;
+  }
+  .conversation-preview {
+    font-size: 13px; color: var(--dtl-gray-500);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .conversation-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .conversation-tag {
+    font-size: 11px; padding: 2px 6px; border-radius: 3px;
+    background: transparent; color: var(--dtl-gray-600);
+    border: 1px solid var(--dtl-gray-300);
+  }
+  .conversation-tag.patient-badge {
+    background: var(--dtl-gray-100); color: var(--dtl-gray-700); border: none;
+    display: flex; align-items: center; gap: 3px;
+  }
+  .conversation-tag.new-badge {
+    background: var(--dtl-green); color: white; border: none; font-weight: 600;
+  }
+  .conversation-date { font-size: 12px; color: var(--dtl-gray-400); flex-shrink: 0; text-align: right; }
+
+  .new-conversation-btn {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    padding: 10px 20px; background: var(--dtl-blue); color: white; border: none;
+    border-radius: var(--radius-full); font-size: 14px; font-weight: 600;
+    cursor: pointer; font-family: var(--font-family);
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    box-shadow: var(--shadow-md);
+  }
+  .new-conversation-btn:hover { background: var(--dtl-blue-dark); }
+
+  /* Right panel: message detail */
+  .message-detail { flex: 1; display: flex; flex-direction: column; background: var(--dtl-white); overflow: hidden; }
+  .message-detail-header {
+    padding: 14px 16px; border-bottom: 1px solid var(--dtl-gray-200);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .message-detail-avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: #4CAF50; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: white; overflow: hidden;
+  }
+  .message-detail-title-section { flex: 1; }
+  .message-detail-title { font-size: 14px; font-weight: 600; color: var(--dtl-gray-800); }
+  .message-detail-subtitle { font-size: 12px; color: var(--dtl-gray-500); margin-top: 2px; }
+  .message-detail-avatars { display: flex; align-items: center; margin-left: auto; }
+  .message-detail-avatar-stack { display: flex; margin-left: -8px; }
+  .avatar-in-stack {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid white; background: var(--dtl-gray-300);
+    flex-shrink: 0; overflow: hidden; margin-left: -6px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 10px;
+  }
+  .avatar-in-stack:first-child { margin-left: 0; }
+  .message-detail-menu {
+    background: none; border: none; color: var(--dtl-gray-400);
+    cursor: pointer; padding: 4px; display: flex; align-items: center;
+    margin-left: 8px;
+  }
+
+  .messages-area {
+    flex: 1; overflow-y: auto; padding: 20px 24px;
+    display: flex; flex-direction: column; gap: 16px;
+    background: var(--dtl-gray-50);
+  }
+  .message-date-separator {
+    display: flex; align-items: center; gap: 12px;
+    color: var(--dtl-gray-400); font-size: 12px; margin: 4px 0;
+    white-space: normal;
+  }
+  .message-date-separator::before,
+  .message-date-separator::after {
+    content: ''; flex: 1; height: 1px; background: var(--dtl-gray-200);
+  }
+
+  .system-message {
+    align-self: center;
+    background: var(--dtl-gray-100);
+    border-radius: var(--radius-full);
+    padding: 6px 14px;
+    font-size: 12px; color: var(--dtl-gray-600);
+  }
+
+  .message-group { display: flex; flex-direction: column; gap: 6px; }
+  .message-sent { display: flex; justify-content: flex-end; align-items: flex-end; gap: 6px; }
+  .message-sent-content { max-width: 70%; text-align: right; }
+  .message-sent-bubble {
+    background: var(--dtl-blue-light); color: var(--dtl-gray-800);
+    padding: 10px 14px; border-radius: 12px 12px 0 12px;
+    font-size: 14px; line-height: 1.45; display: inline-block; text-align: left;
+  }
+  .message-time { font-size: 11px; color: var(--dtl-gray-400); margin-top: 2px; }
+  .message-read-status { color: var(--dtl-blue); font-size: 11px; font-weight: 600; margin-left: 2px; }
+
+  /* Patient card in chat — matches real Doctolib minimal style */
+  .chat-patient-card {
+    align-self: stretch;
+    background: var(--dtl-white);
+    border: 1px solid var(--dtl-gray-200);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    width: 100%;
+    box-shadow: var(--shadow-sm);
+  }
+  .chat-patient-name {
+    font-size: 15px; font-weight: 700; color: var(--dtl-gray-800);
+    display: flex; align-items: center; gap: 8px;
+    letter-spacing: 0.2px;
+  }
+  .chat-patient-meta {
+    font-size: 13px; color: var(--dtl-gray-500);
+    margin-top: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .chat-patient-meta .dot {
+    width: 3px; height: 3px; border-radius: 50%;
+    background: var(--dtl-gray-400); display: inline-block;
+  }
+  .chat-patient-meta .ald-tag {
+    color: var(--dtl-warning-text); font-weight: 600;
+  }
+  .chat-patient-actions {
+    display: flex; align-items: center; gap: 22px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .patient-link-action {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--dtl-blue); font-size: 14px; font-weight: 600;
+    background: none; border: none; padding: 0;
+    font-family: var(--font-family); cursor: pointer;
+    text-decoration: none;
+  }
+  .patient-link-action:hover { color: var(--dtl-blue-dark); text-decoration: underline; }
+  .patient-link-action svg { stroke: currentColor; }
+  .patient-link-action.escap-link { position: relative; }
+  .patient-link-action.escap-link .escap-new-pill {
+    background: var(--dtl-green); color: white;
+    font-size: 9px; font-weight: 700; padding: 2px 6px;
+    border-radius: 10px; margin-left: 4px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+    line-height: 1;
+  }
+
+  /* Message received (from GP) - not used in State 1 but defined for State 3 */
+  .message-received { display: flex; justify-content: flex-start; align-items: flex-end; gap: 8px; }
+  .message-sender-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #4CAF50; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: white; overflow: hidden;
+  }
+  .message-received-content { max-width: 70%; display: flex; flex-direction: column; gap: 4px; }
+  .message-received-bubble {
+    background: var(--dtl-white); padding: 10px 12px; border-radius: 12px 12px 12px 0;
+    border: 1px solid var(--dtl-gray-200);
+    color: var(--dtl-gray-800); font-size: 14px; line-height: 1.45;
+  }
+
+  /* PDF attachment card */
+  .pdf-attachment {
+    background: var(--dtl-white);
+    border: 1px solid var(--dtl-gray-200);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; transition: all 0.15s;
+    min-width: 320px;
+  }
+  .pdf-attachment:hover {
+    border-color: var(--dtl-blue);
+    box-shadow: 0 0 0 3px var(--dtl-blue-light);
+  }
+  .pdf-icon {
+    width: 40px; height: 48px; flex-shrink: 0;
+    background: #EF4444; color: white;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
+    position: relative;
+  }
+  .pdf-icon::before {
+    content: ''; position: absolute; top: 0; right: 0;
+    border-style: solid; border-width: 0 8px 8px 0;
+    border-color: transparent #fff transparent transparent;
+  }
+  .pdf-meta { flex: 1; min-width: 0; }
+  .pdf-filename {
+    font-size: 13px; font-weight: 600; color: var(--dtl-gray-800);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .pdf-details {
+    font-size: 11px; color: var(--dtl-gray-500); margin-top: 2px;
+    display: flex; gap: 8px;
+  }
+  .pdf-score-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--dtl-danger-bg); color: var(--dtl-danger-text);
+    font-size: 10px; font-weight: 700;
+    padding: 2px 6px; border-radius: var(--radius-sm);
+  }
+  .pdf-action-icon {
+    width: 28px; height: 28px; border-radius: var(--radius-sm);
+    background: var(--dtl-gray-100); color: var(--dtl-gray-600);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Chat input */
+  .message-input-area {
+    padding: 12px 16px; border-top: 1px solid var(--dtl-gray-200);
+    display: flex; align-items: center; gap: 12px; background: var(--dtl-white);
+  }
+  .input-icons { display: flex; gap: 4px; flex-shrink: 0; }
+  .input-icon-btn {
+    background: none; border: none; color: var(--dtl-gray-400);
+    cursor: pointer; padding: 4px; display: flex; align-items: center;
+  }
+  .input-icon-btn:hover { color: var(--dtl-gray-600); }
+  .message-input {
+    flex: 1; padding: 10px 16px;
+    border: 1px solid var(--dtl-gray-200);
+    border-radius: var(--radius-full);
+    font-family: var(--font-family); font-size: 14px; color: var(--dtl-gray-800);
+    outline: none;
+  }
+  .message-input::placeholder { color: var(--dtl-gray-400); }
+  .message-input:focus { border-color: var(--dtl-blue); }
+  .send-btn {
+    background: none; border: none; color: var(--dtl-blue); cursor: pointer;
+    padding: 4px; flex-shrink: 0; display: flex; align-items: center;
+  }
+  .send-btn:hover { color: var(--dtl-blue-dark); }
+
+  /* ═══════════════════════════════════════════════════════════════
+     ESCAP MODAL (centered, with dark overlay)
+  ═══════════════════════════════════════════════════════════════ */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 500;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 24px;
+    animation: fadeIn 0.2s ease-out;
+  }
+  .modal-backdrop.visible { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .escap-modal {
+    background: var(--dtl-white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    width: 780px; max-width: 100%;
+    max-height: 92vh;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.25s ease-out;
+  }
+
+  /* Modal header */
+  .escap-modal-header {
+    background: var(--dtl-navy);
+    padding: 18px 24px;
+    display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+    color: white;
+  }
+  .escap-modal-icon {
+    width: 42px; height: 42px; flex-shrink: 0;
+    background: rgba(255,255,255,0.12);
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .escap-modal-title-wrap { flex: 1; }
+  .escap-modal-title {
+    font-size: 17px; font-weight: 700; line-height: 1.2;
+  }
+  .escap-modal-subtitle {
+    font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px;
+  }
+  .escap-modal-close {
+    width: 32px; height: 32px; border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.08); border: none; color: white;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .escap-modal-close:hover { background: rgba(255,255,255,0.18); }
+
+  .score-badge-big {
+    background: rgba(255,255,255,0.12); border-radius: var(--radius-md);
+    padding: 6px 14px; text-align: center; flex-shrink: 0;
+  }
+  .score-badge-big .score-num {
+    font-size: 22px; font-weight: 800; line-height: 1; color: white;
+  }
+  .score-badge-big .score-label {
+    font-size: 10px; color: rgba(255,255,255,0.65);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px;
+  }
+
+  /* Progress bar under header */
+  .progress-bar { height: 3px; background: var(--dtl-gray-200); flex-shrink: 0; }
+  .progress-fill { height: 100%; background: var(--dtl-blue); transition: width 0.25s ease; border-radius: 0 2px 2px 0; }
+
+  /* Modal body - scrollable */
+  .escap-modal-body {
+    flex: 1; overflow-y: auto;
+    padding: 20px 24px 24px;
+  }
+
+  /* Patient info card */
+  .info-card {
+    background: var(--dtl-blue-light);
+    border: 1px solid rgba(5, 150, 222, 0.2);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    display: flex; gap: 14px; align-items: center;
+  }
+  .info-card-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: #9370DB; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; flex-shrink: 0;
+  }
+  .info-card-body { flex: 1; }
+  .info-card-label {
+    font-size: 10px; font-weight: 700; color: var(--dtl-blue);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 2px;
+  }
+  .info-card-name {
+    font-size: 15px; font-weight: 700; color: var(--dtl-gray-800);
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  .info-card-facts {
+    font-size: 12px; color: var(--dtl-gray-600); margin-top: 2px;
+  }
+  .info-card-chip {
+    display: inline-flex; align-items: center; gap: 3px;
+    background: var(--dtl-white); color: var(--dtl-gray-700);
+    font-size: 10px; font-weight: 600; padding: 2px 8px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--dtl-gray-200);
+  }
+  .info-card-chip.ald { background: var(--dtl-warning-bg); color: var(--dtl-warning-text); border-color: transparent; }
+
+  /* Eval meta row */
+  .eval-meta-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 20px;
+  }
+  .eval-meta-field label {
+    display: block; font-size: 11px; font-weight: 600; color: var(--dtl-gray-600);
+    text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px;
+  }
+  .eval-meta-field input,
+  .eval-meta-field select {
+    width: 100%; height: 34px;
+    border: 1px solid var(--dtl-gray-200); border-radius: var(--radius-md);
+    padding: 0 10px; font-size: 13px; color: var(--dtl-gray-800);
+    background: var(--dtl-white); outline: none;
+    font-family: var(--font-family);
+  }
+  .eval-meta-field input:focus,
+  .eval-meta-field select:focus { border-color: var(--dtl-blue); box-shadow: 0 0 0 2px var(--dtl-blue-light); }
+
+  /* Section */
+  .section-title {
+    font-size: 11px; font-weight: 700; color: var(--dtl-gray-500);
+    text-transform: uppercase; letter-spacing: 0.7px;
+    margin-bottom: 10px; margin-top: 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--dtl-gray-200); }
+
+  /* Prerequisites */
+  .prereq-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; background: var(--dtl-gray-50);
+    border-radius: var(--radius-md); margin-bottom: 6px;
+    border: 1px solid var(--dtl-gray-200);
+  }
+  .prereq-text {
+    font-size: 13px; color: var(--dtl-gray-800);
+    flex: 1; padding-right: 12px; line-height: 1.4;
+  }
+  .yn-toggle { display: flex; gap: 6px; flex-shrink: 0; }
+  .yn-btn {
+    min-width: 48px; height: 30px; border-radius: var(--radius-md);
+    border: 1px solid var(--dtl-gray-200);
+    background: var(--dtl-white); font-size: 12px; font-weight: 600;
+    cursor: pointer; color: var(--dtl-gray-600);
+    padding: 0 10px;
+    font-family: var(--font-family);
+    transition: all 0.12s;
+  }
+  .yn-btn:hover { border-color: var(--dtl-gray-400); }
+  .yn-btn.yes.selected {
+    background: var(--dtl-success-bg); border-color: var(--dtl-success-border); color: var(--dtl-success-text);
+  }
+  .yn-btn.no.selected {
+    background: var(--dtl-gray-100); border-color: var(--dtl-gray-400); color: var(--dtl-gray-700);
+  }
+
+  /* Score rows */
+  .score-row {
+    padding: 10px 14px; background: var(--dtl-gray-50);
+    border-radius: var(--radius-md); margin-bottom: 6px;
+    border: 1px solid var(--dtl-gray-200);
+  }
+  .score-row-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 8px; gap: 8px;
+  }
+  .score-row-label {
+    font-size: 13px; font-weight: 600; color: var(--dtl-gray-800); line-height: 1.3;
+  }
+  .score-row-label small {
+    font-weight: 400; color: var(--dtl-gray-500); font-size: 12px;
+  }
+  .row-score-badge {
+    flex-shrink: 0; min-width: 28px; height: 24px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--dtl-gray-200); color: var(--dtl-gray-500);
+    transition: all 0.15s; padding: 0 6px;
+  }
+  .row-score-badge.scored { background: var(--dtl-blue); color: white; }
+
+  .score-options { display: flex; gap: 6px; }
+  .score-option {
+    flex: 1; border: 1px solid var(--dtl-gray-200); border-radius: var(--radius-md);
+    background: var(--dtl-white); padding: 6px 4px; cursor: pointer;
+    text-align: center; transition: all 0.12s;
+    min-width: 0;
+  }
+  .score-option:hover { border-color: var(--dtl-blue); background: var(--dtl-blue-light); }
+  .score-option.selected {
+    border-color: var(--dtl-blue); background: var(--dtl-blue); color: white;
+  }
+  .score-option.selected .opt-val { color: white; }
+  .score-option.selected .opt-label { color: rgba(255,255,255,0.9); }
+  .opt-val {
+    font-size: 14px; font-weight: 700; color: var(--dtl-blue);
+    display: block; line-height: 1; margin-bottom: 3px;
+  }
+  .opt-label {
+    font-size: 10px; color: var(--dtl-gray-600); line-height: 1.2; display: block;
+  }
+
+  .pregnancy-row { display: none; }
+  .pregnancy-row.visible { display: block; }
+  .preg-pill {
+    display: inline-block; background: var(--dtl-warning-bg); color: var(--dtl-warning-text);
+    font-size: 9px; font-weight: 700; padding: 1px 6px;
+    border-radius: var(--radius-sm); margin-left: 6px;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+
+  /* Modal footer */
+  .escap-modal-footer {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--dtl-gray-200);
+    background: var(--dtl-white); flex-shrink: 0;
+  }
+  .result-pill {
+    flex: 1; height: 42px; border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 13px; font-weight: 600; transition: all 0.25s;
+    padding: 0 14px;
+  }
+  .result-pill.neutral { background: var(--dtl-gray-100); color: var(--dtl-gray-500); }
+  .result-pill.ok { background: var(--dtl-success-bg); color: var(--dtl-success-text); }
+  .result-pill.required { background: var(--dtl-danger-bg); color: var(--dtl-danger-text); }
+
+  .btn-secondary {
+    height: 42px; padding: 0 18px; border-radius: var(--radius-md);
+    border: 1px solid var(--dtl-gray-200); background: var(--dtl-white);
+    font-family: var(--font-family); font-size: 13px; font-weight: 600;
+    color: var(--dtl-gray-700); cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-secondary:hover { background: var(--dtl-gray-50); }
+
+  .btn-primary {
+    height: 42px; padding: 0 18px; border-radius: var(--radius-md);
+    border: none; background: var(--dtl-blue); color: white;
+    font-family: var(--font-family); font-size: 13px; font-weight: 700;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { background: var(--dtl-blue-dark); }
+  .btn-primary:disabled { background: var(--dtl-gray-300); cursor: not-allowed; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     PDF PREVIEW OVERLAY
+  ═══════════════════════════════════════════════════════════════ */
+  .pdf-preview-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, 0.85);
+    z-index: 600;
+    display: none;
+    flex-direction: column;
+    animation: fadeIn 0.2s ease-out;
+  }
+  .pdf-preview-overlay.visible { display: flex; }
+
+  .pdf-preview-toolbar {
+    background: #1F2937; color: white;
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 14px;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .pdf-preview-close {
+    width: 34px; height: 34px; border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.08); border: none; color: white;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .pdf-preview-close:hover { background: rgba(255,255,255,0.18); }
+  .pdf-preview-title {
+    font-size: 14px; font-weight: 600; flex: 1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .pdf-preview-actions {
+    display: flex; gap: 6px; flex-shrink: 0;
+  }
+  .pdf-toolbar-btn {
+    height: 34px; padding: 0 12px; border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.08); border: none; color: white;
+    font-family: var(--font-family); font-size: 12px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 6px;
+  }
+  .pdf-toolbar-btn:hover { background: rgba(255,255,255,0.18); }
+  .pdf-toolbar-btn.primary {
+    background: var(--dtl-blue);
+  }
+  .pdf-toolbar-btn.primary:hover { background: var(--dtl-blue-dark); }
+
+  .pdf-preview-scroll {
+    flex: 1; overflow-y: auto;
+    display: flex; justify-content: center;
+    padding: 28px 20px;
+    background: #4B5563;
+  }
+  .pdf-page {
+    background: white;
+    width: 794px; /* A4 at 96dpi */
+    min-height: 1123px;
+    padding: 50px 54px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    color: var(--dtl-gray-800);
+    font-family: var(--font-family);
+    font-size: 11.5px;
+    line-height: 1.5;
+    position: relative;
+  }
+  .pdf-page + .pdf-page { margin-top: 20px; }
+
+  .pdf-doc-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding-bottom: 14px; border-bottom: 2px solid var(--dtl-navy);
+    margin-bottom: 20px;
+  }
+  .pdf-brand {
+    font-size: 18px; font-weight: 800; color: var(--dtl-navy);
+    letter-spacing: -0.3px;
+  }
+  .pdf-brand .brand-sub {
+    font-size: 11px; font-weight: 500; color: var(--dtl-gray-500);
+    letter-spacing: 0; margin-top: 2px; display: block;
+  }
+  .pdf-doc-meta {
+    font-size: 10px; color: var(--dtl-gray-500); text-align: right;
+  }
+
+  .pdf-doc-title {
+    font-size: 20px; font-weight: 800; color: var(--dtl-gray-800);
+    margin-bottom: 4px;
+  }
+  .pdf-doc-subtitle {
+    font-size: 12px; color: var(--dtl-gray-600); margin-bottom: 20px;
+  }
+
+  .pdf-score-banner {
+    background: var(--dtl-danger-bg);
+    border-left: 4px solid #DC2626;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .pdf-score-num {
+    font-size: 32px; font-weight: 800; color: var(--dtl-danger-text);
+    line-height: 1;
+  }
+  .pdf-score-info { flex: 1; }
+  .pdf-score-info-title {
+    font-size: 13px; font-weight: 700; color: var(--dtl-danger-text);
+    margin-bottom: 2px;
+  }
+  .pdf-score-info-desc {
+    font-size: 11px; color: var(--dtl-gray-700);
+  }
+
+  .pdf-section {
+    margin-bottom: 18px;
+    page-break-inside: avoid;
+  }
+  .pdf-section-title {
+    font-size: 12px; font-weight: 700; color: var(--dtl-navy);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding-bottom: 4px; border-bottom: 1px solid var(--dtl-gray-200);
+    margin-bottom: 10px;
+  }
+
+  .pdf-info-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6px 28px;
+  }
+  .pdf-info-item {
+    display: flex; padding: 4px 0;
+    border-bottom: 1px dotted var(--dtl-gray-200);
+  }
+  .pdf-info-item .label {
+    font-weight: 600; color: var(--dtl-gray-600); width: 42%;
+    font-size: 10.5px;
+  }
+  .pdf-info-item .value {
+    color: var(--dtl-gray-800); flex: 1;
+    font-size: 11px;
+  }
+
+  .pdf-prereq-list {
+    list-style: none; padding: 0; margin: 0;
+  }
+  .pdf-prereq-list li {
+    display: flex; align-items: center; gap: 10px;
+    padding: 5px 0; font-size: 11px;
+    border-bottom: 1px dotted var(--dtl-gray-200);
+  }
+  .pdf-prereq-list li:last-child { border-bottom: none; }
+  .pdf-prereq-list .answer {
+    margin-left: auto; font-weight: 700; font-size: 10.5px;
+    padding: 2px 8px; border-radius: 3px;
+  }
+  .pdf-prereq-list .answer.yes { background: var(--dtl-success-bg); color: var(--dtl-success-text); }
+  .pdf-prereq-list .answer.no { background: var(--dtl-gray-100); color: var(--dtl-gray-600); }
+
+  .pdf-score-table {
+    width: 100%; border-collapse: collapse; font-size: 11px;
+  }
+  .pdf-score-table th,
+  .pdf-score-table td {
+    padding: 7px 10px; text-align: left;
+    border-bottom: 1px solid var(--dtl-gray-200);
+  }
+  .pdf-score-table th {
+    background: var(--dtl-gray-50); font-weight: 700;
+    color: var(--dtl-gray-700); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .pdf-score-table td.criterion { font-weight: 600; color: var(--dtl-gray-800); }
+  .pdf-score-table td.answer { color: var(--dtl-gray-600); font-size: 10.5px; }
+  .pdf-score-table td.pts {
+    text-align: center; font-weight: 700;
+    color: var(--dtl-navy); width: 50px;
+  }
+  .pdf-score-table tr.total-row td {
+    background: var(--dtl-navy); color: white;
+    font-size: 12px; font-weight: 700; padding: 10px;
+  }
+  .pdf-score-table tr.total-row td.pts {
+    color: white; font-size: 15px;
+  }
+
+  .pdf-footer {
+    position: absolute; left: 54px; right: 54px; bottom: 30px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    font-size: 9px; color: var(--dtl-gray-400);
+    padding-top: 14px; border-top: 1px solid var(--dtl-gray-200);
+  }
+  .pdf-signature {
+    font-size: 10px;
+  }
+  .pdf-signature .sig-label { color: var(--dtl-gray-500); margin-bottom: 4px; }
+  .pdf-signature .sig-name {
+    color: var(--dtl-gray-800); font-weight: 600;
+    font-family: 'Times New Roman', serif; font-style: italic;
+    font-size: 13px;
+  }
+
+  /* Page indicator */
+  .flow-stepper {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--dtl-navy); color: white;
+    padding: 10px 16px; border-radius: var(--radius-full);
+    font-size: 12px; font-weight: 600; z-index: 700;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: var(--shadow-lg);
+  }
+  .flow-stepper-label { opacity: 0.7; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .flow-stepper-current { font-size: 13px; }
+  .stepper-btn {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(255,255,255,0.12); border: none; color: white;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .stepper-btn:hover { background: rgba(255,255,255,0.22); }
+  .stepper-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* Scrollbar polish */
+  .escap-modal-body::-webkit-scrollbar,
+  .messages-area::-webkit-scrollbar,
+  .pdf-preview-scroll::-webkit-scrollbar { width: 8px; }
+  .escap-modal-body::-webkit-scrollbar-thumb,
+  .messages-area::-webkit-scrollbar-thumb { background: var(--dtl-gray-300); border-radius: 4px; }
+  .pdf-preview-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; top: 72px; right: 24px; z-index: 800;
+    background: var(--dtl-navy); color: white;
+    padding: 12px 18px; border-radius: var(--radius-md);
+    font-size: 13px; font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    display: flex; align-items: center; gap: 10px;
+    transform: translateX(420px); opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .toast.visible { transform: translateX(0); opacity: 1; }
+  .toast .toast-icon {
+    width: 22px; height: 22px; background: var(--dtl-green);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav class="sidebar">
+  <a href="index.html" class="sidebar-logo">
+    <div class="sidebar-logo-icon">
+      <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
+        <path d="M13 7h7c7 0 11.5 4.5 11.5 11.5S27 30 20 30h-7V7zm3.8 3.5v16h3c4.8 0 7.5-3.2 7.5-8s-2.7-8-7.5-8h-3z" fill="white" opacity="0.95"/>
+      </svg>
+    </div>
+  </a>
+  <div class="sidebar-nav">
+    <a class="sidebar-item" href="agenda.html">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Agenda</span>
+    </a>
+    <div class="sidebar-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>Tasks</span>
+    </div>
+    <a class="sidebar-item active" href="discussions.html">
+      <span class="sidebar-badge">3</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Connect</span>
+    </a>
+    <div class="sidebar-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Patient Messaging</span>
+    </div>
+    <div class="sidebar-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 8h20"/><path d="M12 8v13"/><circle cx="7" cy="14" r="2"/></svg>
+      <span>Patient Management</span>
+    </div>
+    <div class="sidebar-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span>Emails</span>
+    </div>
+  </div>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-bottom">
+    <div class="sidebar-avatar-bottom" style="background: #4CAF50;">SB</div>
+  </div>
+</nav>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="header">
+  <div class="header-search">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>Rechercher un patient</span>
+    <div class="header-shortcut">&#8984;+K</div>
+  </div>
+  <div class="header-actions">
+    <div class="header-chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Carte Vitale
+    </div>
+    <div class="header-separator"></div>
+    <button class="header-icon-btn" title="Notifications">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
+    <button class="header-icon-btn" title="Settings">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+    <div class="header-avatar">SB</div>
+    <span class="header-locale">FR</span>
+  </div>
+</header>
+
+<!-- ═══════════ SUB-SIDEBAR ═══════════ -->
+<aside class="sub-sidebar">
+  <div class="sub-sidebar-title">Connect</div>
+  <a class="sub-sidebar-item active" href="#">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Discussions
+  </a>
+  <a class="sub-sidebar-item" href="tle-flow.html">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><path d="M10 22v-4h4v4"/></svg>
+    Tele-expertise
+    <span class="sub-sidebar-tag">New</span>
+  </a>
+</aside>
+
+<!-- ═══════════ CONTENT ═══════════ -->
+<main class="content">
+  <!-- LEFT PANEL: Conversation list -->
+  <div class="conversation-list">
+    <div class="conversation-header">
+      <div class="conversation-title-row">
+        <div class="conversation-title">Discussions</div>
+        <div class="conversation-badge">3</div>
+        <button class="conversation-menu-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+        </button>
+      </div>
+      <div class="conversation-search-container">
+        <div class="conversation-search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Rechercher">
+        </div>
+      </div>
+    </div>
+    <div class="filter-tabs">
+      <button class="filter-tab active">Tous</button>
+      <button class="filter-tab">Non lus</button>
+      <button class="filter-tab">Favoris</button>
+    </div>
+
+    <div class="conversations-scroll">
+      <!-- ACTIVE: New conversation with Dr. Martin + Jean Dupont (freshly created) -->
+      <div class="conversation-item active">
+        <div class="conversation-avatar" style="background:#4CAF50;">MM</div>
+        <div class="conversation-content">
+          <div class="conversation-names">Dr. Marie MARTIN</div>
+          <div class="conversation-preview" id="previewLine">
+            <span style="color: var(--dtl-gray-400);">Aucun message pour l'instant</span>
+          </div>
+          <div class="conversation-tags">
+            <div class="conversation-tag patient-badge">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Jean DUPONT
+            </div>
+            <div class="conversation-tag new-badge">Nouveau</div>
+          </div>
+        </div>
+        <div class="conversation-date">Maintenant</div>
+      </div>
+
+      <div class="conversation-item">
+        <div class="conversation-avatar" style="background:#FF8A3D;">PL</div>
+        <div class="conversation-content">
+          <div class="conversation-names">Dr. Pierre LEGRAND</div>
+          <div class="conversation-preview">Merci, je prends en charge.</div>
+          <div class="conversation-tags">
+            <div class="conversation-tag patient-badge">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Yvette MOREAU
+            </div>
+          </div>
+        </div>
+        <div class="conversation-date">11:52</div>
+      </div>
+
+      <div class="conversation-item">
+        <div class="conversation-avatar" style="background:#9370DB;">EB</div>
+        <div class="conversation-content">
+          <div class="conversation-names">Elise BERNARD, Sarah K.</div>
+          <div class="conversation-preview">Le bilan hebdo est prêt.</div>
+        </div>
+        <div class="conversation-date">Hier</div>
+      </div>
+
+      <div class="conversation-item">
+        <div class="conversation-avatar" style="background:#4DD0E1;">JR</div>
+        <div class="conversation-content">
+          <div class="conversation-names">Dr. Julien ROUX</div>
+          <div class="conversation-preview">OK pour la télé-expertise demain.</div>
+          <div class="conversation-tags">
+            <div class="conversation-tag">Tele-expertise</div>
+          </div>
+        </div>
+        <div class="conversation-date">18/04</div>
+      </div>
+    </div>
+
+    <button class="new-conversation-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouveau
+    </button>
+  </div>
+
+  <!-- RIGHT PANEL: Message detail -->
+  <div class="message-detail">
+    <div class="message-detail-header">
+      <div class="message-detail-avatar">MM</div>
+      <div class="message-detail-title-section">
+        <div class="message-detail-title">Dr. Marie MARTIN</div>
+        <div class="message-detail-subtitle">Médecin généraliste · Cabinet Saint-Louis, Paris 11e</div>
+      </div>
+      <div class="message-detail-avatars">
+        <div class="message-detail-avatar-stack">
+          <div class="avatar-in-stack" style="background:#4CAF50;">MM</div>
+          <div class="avatar-in-stack" style="background:#0596DE;">SB</div>
+        </div>
+      </div>
+      <button class="message-detail-menu">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+      </button>
+    </div>
+
+    <div class="messages-area" id="messagesArea">
+      <!-- Patient card — pinned to top, above date separator -->
+      <div class="chat-patient-card" id="patientCard">
+        <div class="chat-patient-name">Jean DUPONT</div>
+        <div class="chat-patient-meta">
+          <span>Homme</span>
+          <span class="dot"></span>
+          <span>14/03/1948 (78 ans 1 mois)</span>
+          <span class="dot"></span>
+          <span class="ald-tag">ALD — Polypathologie</span>
+        </div>
+        <div class="chat-patient-actions">
+          <button class="patient-link-action" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            Ajouter un dossier patient
+          </button>
+          <button class="patient-link-action escap-link" type="button" onclick="openEscapModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+            Lancer une grille ESCAP
+            <span class="escap-new-pill">Nouveau</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="message-date-separator">Aujourd'hui — 21 avril 2026</div>
+
+      <div class="system-message">
+        Sophie BERNARD a créé cette conversation et attaché le patient Jean DUPONT.
+      </div>
+
+      <div class="system-message" style="background: var(--dtl-blue-light); color: var(--dtl-blue);">
+        💡 Lancez une grille ESCAP pour évaluer le besoin de coordination de ce patient.
+      </div>
+    </div>
+
+    <div class="message-input-area">
+      <div class="input-icons">
+        <button class="input-icon-btn" title="Emoji">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </button>
+        <button class="input-icon-btn" title="Joindre un fichier">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+      </div>
+      <input type="text" class="message-input" placeholder="Écrire un message...">
+      <button class="send-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     ESCAP MODAL (centered, backdrop overlay)
+══════════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="escapBackdrop" onclick="handleBackdropClick(event)">
+  <div class="escap-modal" onclick="event.stopPropagation()">
+    <div class="escap-modal-header">
+      <div class="escap-modal-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+      </div>
+      <div class="escap-modal-title-wrap">
+        <div class="escap-modal-title">Grille ESCAP</div>
+        <div class="escap-modal-subtitle">Évaluation du besoin de coordination — Jean DUPONT</div>
+      </div>
+      <div class="score-badge-big">
+        <div class="score-num" id="scoreDisplay">—</div>
+        <div class="score-label">/ <span id="scoreMax">26</span> pts</div>
+      </div>
+      <button class="escap-modal-close" onclick="closeEscapModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+
+    <div class="escap-modal-body">
+      <!-- Patient info card -->
+      <div class="info-card">
+        <div class="info-card-avatar">JD</div>
+        <div class="info-card-body">
+          <div class="info-card-label">Patient attaché</div>
+          <div class="info-card-name">
+            Jean DUPONT
+            <span class="info-card-chip">14/03/1948 · 78 ans</span>
+            <span class="info-card-chip">Homme</span>
+            <span class="info-card-chip ald">ALD — Polypathologie</span>
+          </div>
+          <div class="info-card-facts">Adresse : 12 rue de la République, 75011 Paris · Médecin traitant : Dr. Marie MARTIN</div>
+        </div>
+      </div>
+
+      <!-- Eval meta -->
+      <div class="eval-meta-row">
+        <div class="eval-meta-field">
+          <label>Date d'évaluation</label>
+          <input type="date" id="evalDate">
+        </div>
+        <div class="eval-meta-field">
+          <label>Profession évaluateur</label>
+          <input type="text" id="evalProf" value="Infirmière diplômée d'État (IDEL)">
+        </div>
+      </div>
+
+      <!-- Prerequisites -->
+      <div class="section-title">Prérequis d'éligibilité</div>
+      <div class="prereq-item">
+        <div class="prereq-text">Patients diabétiques sous insuline</div>
+        <div class="yn-toggle">
+          <button class="yn-btn yes" onclick="setPrereq(this, 'p1', 'oui')">Oui</button>
+          <button class="yn-btn no" onclick="setPrereq(this, 'p1', 'non')">Non</button>
+        </div>
+      </div>
+      <div class="prereq-item">
+        <div class="prereq-text">Patients ayant fait un AVC post-hospitalisation</div>
+        <div class="yn-toggle">
+          <button class="yn-btn yes" onclick="setPrereq(this, 'p2', 'oui')">Oui</button>
+          <button class="yn-btn no" onclick="setPrereq(this, 'p2', 'non')">Non</button>
+        </div>
+      </div>
+      <div class="prereq-item">
+        <div class="prereq-text">Patients en soins palliatifs</div>
+        <div class="yn-toggle">
+          <button class="yn-btn yes" onclick="setPrereq(this, 'p3', 'oui')">Oui</button>
+          <button class="yn-btn no" onclick="setPrereq(this, 'p3', 'non')">Non</button>
+        </div>
+      </div>
+      <div class="prereq-item">
+        <div class="prereq-text">Patients polypathologiques chroniques de plus de 65 ans</div>
+        <div class="yn-toggle">
+          <button class="yn-btn yes" onclick="setPrereq(this, 'p4', 'oui')">Oui</button>
+          <button class="yn-btn no" onclick="setPrereq(this, 'p4', 'non')">Non</button>
+        </div>
+      </div>
+
+      <!-- Score grid -->
+      <div class="section-title" style="margin-top: 18px;">Grille de score</div>
+
+      <div class="score-row" data-key="s_interv">
+        <div class="score-row-header">
+          <div class="score-row-label">Nombre d'intervenants PS</div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_interv',0)"><span class="opt-val">0</span><span class="opt-label">1 intervenant</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_interv',1)"><span class="opt-val">1</span><span class="opt-label">2 à 3</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_interv',2)"><span class="opt-val">2</span><span class="opt-label">Plus de 3</span></div>
+        </div>
+      </div>
+
+      <div class="score-row" data-key="s_age">
+        <div class="score-row-header">
+          <div class="score-row-label">Âge</div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_age',0)"><span class="opt-val">0</span><span class="opt-label">16–65 ans</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_age',1)"><span class="opt-val">1</span><span class="opt-label">65–75 ans</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_age',2)"><span class="opt-val">2</span><span class="opt-label">&lt;16 ou &gt;75</span></div>
+        </div>
+      </div>
+
+      <div class="score-row" data-key="s_patho">
+        <div class="score-row-header">
+          <div class="score-row-label">Nombre de pathologies</div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_patho',0)"><span class="opt-val">0</span><span class="opt-label">1</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_patho',1)"><span class="opt-val">1</span><span class="opt-label">2</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_patho',2)"><span class="opt-val">2</span><span class="opt-label">Plus de 2</span></div>
+        </div>
+      </div>
+
+      <div class="score-row" data-key="s_meds">
+        <div class="score-row-header">
+          <div class="score-row-label">Médicaments <small>(y compris oxygène)</small></div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_meds',0)"><span class="opt-val">0</span><span class="opt-label">0 à 3</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_meds',1)"><span class="opt-val">1</span><span class="opt-label">4</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_meds',2)"><span class="opt-val">2</span><span class="opt-label">5 ou plus</span></div>
+        </div>
+      </div>
+
+      <div class="score-row" data-key="s_hospi">
+        <div class="score-row-header">
+          <div class="score-row-label">Hospitalisation <small>(6 derniers mois)</small></div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_hospi',0)"><span class="opt-val">0</span><span class="opt-label">Aucune</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_hospi',1)"><span class="opt-val">1</span><span class="opt-label">1 hospi</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_hospi',2)"><span class="opt-val">2</span><span class="opt-label">Plusieurs</span></div>
+        </div>
+      </div>
+
+      <div class="score-row" data-key="s_chir">
+        <div class="score-row-header">
+          <div class="score-row-label">Chirurgie <small>(12 derniers mois)</small></div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_chir',0)"><span class="opt-val">0</span><span class="opt-label">Non</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_chir',1)"><span class="opt-val">1</span><span class="opt-label">Oui</span></div>
+        </div>
+      </div>
+
+      <div class="score-row" data-key="s_vuln">
+        <div class="score-row-header">
+          <div class="score-row-label">Vulnérabilités <small>(addictions, précarité, état psy)</small></div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_vuln',0)"><span class="opt-val">0</span><span class="opt-label">Aucune</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_vuln',1)"><span class="opt-val">1</span><span class="opt-label">Une</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_vuln',2)"><span class="opt-val">2</span><span class="opt-label">Plusieurs</span></div>
+        </div>
+      </div>
+
+      <div class="score-row" data-key="s_aide">
+        <div class="score-row-header">
+          <div class="score-row-label">Aide à domicile</div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_aide',0)"><span class="opt-val">0</span><span class="opt-label">Non</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_aide',1)"><span class="opt-val">1</span><span class="opt-label">&lt;1h/j</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_aide',2)"><span class="opt-val">2</span><span class="opt-label">&gt;1h/j</span></div>
+        </div>
+      </div>
+
+      <div class="score-row" data-key="s_mobi">
+        <div class="score-row-header">
+          <div class="score-row-label">Mobilité <small>(se lever, marcher)</small></div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_mobi',0)"><span class="opt-val">0</span><span class="opt-label">Indépendant</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_mobi',1)"><span class="opt-val">1</span><span class="opt-label">Soutien</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_mobi',2)"><span class="opt-val">2</span><span class="opt-label">Incapacité</span></div>
+        </div>
+      </div>
+
+      <div class="score-row" data-key="s_cont">
+        <div class="score-row-header">
+          <div class="score-row-label">Continence <small>(urinaire et/ou fécale)</small></div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_cont',0)"><span class="opt-val">0</span><span class="opt-label">Continence</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_cont',1)"><span class="opt-val">1</span><span class="opt-label">Occ.</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_cont',2)"><span class="opt-val">2</span><span class="opt-label">Permanente</span></div>
+        </div>
+      </div>
+
+      <div class="score-row" data-key="s_poids">
+        <div class="score-row-header">
+          <div class="score-row-label">Poids / Nutrition</div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_poids',0)"><span class="opt-val">0</span><span class="opt-label">Stable</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_poids',1)"><span class="opt-val">1</span><span class="opt-label">Var. &gt;3kg</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_poids',2)"><span class="opt-val">2</span><span class="opt-label">Dénutrition</span></div>
+        </div>
+      </div>
+
+      <div class="score-row" data-key="s_sens">
+        <div class="score-row-header">
+          <div class="score-row-label">Troubles sensoriels <small>(audition, vision, toucher)</small></div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_sens',0)"><span class="opt-val">0</span><span class="opt-label">Aucun</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_sens',1)"><span class="opt-val">1</span><span class="opt-label">Légers</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_sens',2)"><span class="opt-val">2</span><span class="opt-label">Importants</span></div>
+        </div>
+      </div>
+
+      <div class="score-row" data-key="s_cogn">
+        <div class="score-row-header">
+          <div class="score-row-label">Fonctions cognitives / communication <small>(langage, mémoire, orientation)</small></div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_cogn',0)"><span class="opt-val">0</span><span class="opt-label">Normales</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_cogn',1)"><span class="opt-val">1</span><span class="opt-label">Peu altérées</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_cogn',2)"><span class="opt-val">2</span><span class="opt-label">Altérées</span></div>
+        </div>
+      </div>
+
+      <!-- Pregnancy hidden by default (patient is male) -->
+      <div class="score-row pregnancy-row" data-key="s_gross" id="pregnancyRow">
+        <div class="score-row-header">
+          <div class="score-row-label">Grossesse <span class="preg-pill">+2 pts max</span></div>
+          <span class="row-score-badge">—</span>
+        </div>
+        <div class="score-options">
+          <div class="score-option" onclick="selectScore(this,'s_gross',0)"><span class="opt-val">0</span><span class="opt-label">&gt;36 SA</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_gross',1)"><span class="opt-val">1</span><span class="opt-label">32–36 SA</span></div>
+          <div class="score-option" onclick="selectScore(this,'s_gross',2)"><span class="opt-val">2</span><span class="opt-label">28–32 SA</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="escap-modal-footer">
+      <div class="result-pill neutral" id="resultPill">
+        <span id="resultText">Remplir la grille</span>
+      </div>
+      <button class="btn-secondary" onclick="closeEscapModal()">Annuler</button>
+      <button class="btn-primary" id="sendBtn" disabled onclick="submitForm()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Envoyer au médecin
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PDF PREVIEW OVERLAY (full-screen)
+══════════════════════════════════════════════════════════════════ -->
+<div class="pdf-preview-overlay" id="pdfPreview">
+  <div class="pdf-preview-toolbar">
+    <button class="pdf-preview-close" onclick="closePdfPreview()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="pdf-preview-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      ESCAP_DUPONT_Jean_21-04-2026.pdf
+    </div>
+    <div class="pdf-preview-actions">
+      <button class="pdf-toolbar-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Télécharger
+      </button>
+      <button class="pdf-toolbar-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Imprimer
+      </button>
+    </div>
+  </div>
+  <div class="pdf-preview-scroll">
+    <div class="pdf-page">
+      <div class="pdf-doc-header">
+        <div class="pdf-brand">
+          Doctolib<span style="color: var(--dtl-blue);">·</span>Connect
+          <span class="brand-sub">Grille d'évaluation du besoin de coordination</span>
+        </div>
+        <div class="pdf-doc-meta">
+          Document généré le 21/04/2026 à <span id="pdfGenTime">14:32</span><br>
+          Réf. ESCAP-2026-<span id="pdfRefNum">047291</span><br>
+          Page 1 / 1
+        </div>
+      </div>
+
+      <div class="pdf-doc-title">Grille ESCAP</div>
+      <div class="pdf-doc-subtitle">Évaluation du besoin de coordination — <strong>Jean DUPONT</strong></div>
+
+      <!-- Score banner -->
+      <div class="pdf-score-banner" id="pdfScoreBanner">
+        <div class="pdf-score-num" id="pdfScoreNum">—</div>
+        <div class="pdf-score-info">
+          <div class="pdf-score-info-title" id="pdfScoreTitle">Coordination requise</div>
+          <div class="pdf-score-info-desc" id="pdfScoreDesc">Score ≥ 13/26 — Un plan de coordination multidisciplinaire est recommandé pour ce patient.</div>
+        </div>
+      </div>
+
+      <!-- Patient info -->
+      <div class="pdf-section">
+        <div class="pdf-section-title">Informations patient</div>
+        <div class="pdf-info-grid">
+          <div class="pdf-info-item"><span class="label">Nom</span><span class="value">DUPONT</span></div>
+          <div class="pdf-info-item"><span class="label">Prénom</span><span class="value">Jean</span></div>
+          <div class="pdf-info-item"><span class="label">Date de naissance</span><span class="value">14/03/1948 (78 ans)</span></div>
+          <div class="pdf-info-item"><span class="label">Sexe</span><span class="value">Masculin</span></div>
+          <div class="pdf-info-item"><span class="label">Médecin traitant</span><span class="value">Dr. Marie MARTIN</span></div>
+          <div class="pdf-info-item"><span class="label">ALD</span><span class="value">Oui — Polypathologie</span></div>
+          <div class="pdf-info-item"><span class="label">Adresse</span><span class="value">12 rue de la République, 75011 Paris</span></div>
+          <div class="pdf-info-item"><span class="label">Date d'évaluation</span><span class="value" id="pdfEvalDate">21/04/2026</span></div>
+        </div>
+      </div>
+
+      <!-- Prerequisites -->
+      <div class="pdf-section">
+        <div class="pdf-section-title">Prérequis d'éligibilité</div>
+        <ul class="pdf-prereq-list" id="pdfPrereqList">
+          <li>Patients diabétiques sous insuline<span class="answer no">Non</span></li>
+          <li>Patients ayant fait un AVC post-hospitalisation<span class="answer no">Non</span></li>
+          <li>Patients en soins palliatifs<span class="answer no">Non</span></li>
+          <li>Patients polypathologiques chroniques de plus de 65 ans<span class="answer yes">Oui</span></li>
+        </ul>
+      </div>
+
+      <!-- Score table -->
+      <div class="pdf-section">
+        <div class="pdf-section-title">Détail du score</div>
+        <table class="pdf-score-table">
+          <thead>
+            <tr>
+              <th style="width: 38%;">Critère</th>
+              <th>Réponse</th>
+              <th style="text-align: center; width: 50px;">Pts</th>
+            </tr>
+          </thead>
+          <tbody id="pdfScoreTableBody">
+            <!-- populated by JS -->
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="2">TOTAL</td>
+              <td class="pts"><span id="pdfTotalScore">—</span> / <span id="pdfTotalMax">26</span></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="pdf-footer">
+        <div class="pdf-signature">
+          <div class="sig-label">Évaluateur — Infirmière diplômée d'État (IDEL)</div>
+          <div class="sig-name">Sophie BERNARD</div>
+        </div>
+        <div style="text-align: right;">
+          Document confidentiel — Doctolib Connect · Secret médical (Art. L1110-4 CSP)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-icon">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+  </div>
+  <span id="toastText">Grille ESCAP envoyée à Dr. MARTIN</span>
+</div>
+
+<!-- Floating flow stepper -->
+<div class="flow-stepper">
+  <span class="flow-stepper-label">ESCAP Flow</span>
+  <span class="flow-stepper-current" id="stepLabel">1 / 5 — Patient attaché</span>
+  <button class="stepper-btn" id="prevStep" onclick="goStep(-1)" title="Précédent">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="stepper-btn" id="nextStep" onclick="goStep(1)" title="Suivant">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<script>
+  /* ── State ── */
+  const scores = {};
+  const prereqs = {};
+  let isPregnant = false;
+  let currentStep = 1;
+
+  // Dictionary for PDF display
+  const scoreKeyInfo = {
+    s_interv: { label: "Nombre d'intervenants PS", opts: ["1 intervenant", "2 à 3 intervenants", "Plus de 3 intervenants"] },
+    s_age:    { label: "Âge", opts: ["16–65 ans", "65–75 ans", "<16 ou >75 ans"] },
+    s_patho:  { label: "Nombre de pathologies", opts: ["1 pathologie", "2 pathologies", "Plus de 2 pathologies"] },
+    s_meds:   { label: "Médicaments (y compris oxygène)", opts: ["0 à 3", "4", "5 ou plus"] },
+    s_hospi:  { label: "Hospitalisation (6 derniers mois)", opts: ["Aucune", "1 hospitalisation", "Plusieurs"] },
+    s_chir:   { label: "Chirurgie (12 derniers mois)", opts: ["Non", "Oui"] },
+    s_vuln:   { label: "Vulnérabilités (addictions, précarité, psy)", opts: ["Aucune", "Une", "Plusieurs"] },
+    s_aide:   { label: "Aide à domicile", opts: ["Non", "<1h/j", ">1h/j"] },
+    s_mobi:   { label: "Mobilité", opts: ["Indépendant", "Soutien", "Incapacité"] },
+    s_cont:   { label: "Continence", opts: ["Continence", "Occasionnelle", "Permanente"] },
+    s_poids:  { label: "Poids / Nutrition", opts: ["Stable", "Variation >3kg", "Dénutrition"] },
+    s_sens:   { label: "Troubles sensoriels", opts: ["Aucun", "Légers", "Importants"] },
+    s_cogn:   { label: "Fonctions cognitives / communication", opts: ["Normales", "Peu altérées", "Altérées"] },
+    s_gross:  { label: "Grossesse", opts: [">36 SA", "32–36 SA", "28–32 SA"] },
+  };
+
+  const prereqLabels = {
+    p1: "Patients diabétiques sous insuline",
+    p2: "Patients ayant fait un AVC post-hospitalisation",
+    p3: "Patients en soins palliatifs",
+    p4: "Patients polypathologiques chroniques de plus de 65 ans",
+  };
+
+  /* ── Date init ── */
+  document.getElementById('evalDate').value = '2026-04-21';
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('pdfGenTime').textContent = `${hh}:${mm}`;
+
+  /* ── Modal open/close ── */
+  function openEscapModal() {
+    document.getElementById('escapBackdrop').classList.add('visible');
+    setStep(2);
+    updateScore();
+  }
+  function closeEscapModal() {
+    document.getElementById('escapBackdrop').classList.remove('visible');
+    // If we hadn't submitted, roll back to step 1
+    if (currentStep === 2) setStep(1);
+  }
+  function handleBackdropClick(e) {
+    if (e.target === e.currentTarget) closeEscapModal();
+  }
+
+  /* ── Prereq/score handlers ── */
+  function setPrereq(btn, id, val) {
+    const parent = btn.closest('.yn-toggle');
+    parent.querySelectorAll('.yn-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    prereqs[id] = val;
+    updateScore();
+  }
+
+  function selectScore(el, key, val) {
+    const parent = el.closest('.score-options');
+    parent.querySelectorAll('.score-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    scores[key] = val;
+    const badge = el.closest('.score-row').querySelector('.row-score-badge');
+    if (badge) { badge.textContent = val; badge.classList.add('scored'); }
+    updateScore();
+  }
+
+  function updateScore() {
+    const scoreKeys = ['s_interv','s_age','s_patho','s_meds','s_hospi','s_chir','s_vuln','s_aide','s_mobi','s_cont','s_poids','s_sens','s_cogn'];
+    if (isPregnant) scoreKeys.push('s_gross');
+    let total = 0, filled = 0;
+    scoreKeys.forEach(k => { if (scores[k] !== undefined) { total += scores[k]; filled++; } });
+
+    const maxScore = isPregnant ? 28 : 26;
+    const threshold = isPregnant ? 14 : 13;
+    const display = document.getElementById('scoreDisplay');
+    const maxLabel = document.getElementById('scoreMax');
+    const pill = document.getElementById('resultPill');
+    const pillTxt = document.getElementById('resultText');
+    const sendBtn = document.getElementById('sendBtn');
+    maxLabel.textContent = maxScore;
+
+    // Progress
+    const prereqKeys = ['p1','p2','p3','p4'];
+    let done = filled;
+    prereqKeys.forEach(k => { if (prereqs[k]) done += 1; });
+    const totalFields = scoreKeys.length + prereqKeys.length;
+    const pct = Math.round((done / totalFields) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    if (filled === 0) {
+      display.textContent = '—';
+      pill.className = 'result-pill neutral';
+      pillTxt.textContent = 'Remplir la grille';
+      sendBtn.disabled = true;
+      return;
+    }
+    display.textContent = total;
+    if (filled < scoreKeys.length) {
+      pill.className = 'result-pill neutral';
+      pillTxt.textContent = `${filled}/${scoreKeys.length} critères renseignés`;
+      sendBtn.disabled = true;
+    } else {
+      sendBtn.disabled = false;
+      if (total >= threshold) {
+        pill.className = 'result-pill required';
+        pillTxt.innerHTML = `⚠️ Coordination requise (${total}/${maxScore})`;
+      } else {
+        pill.className = 'result-pill ok';
+        pillTxt.innerHTML = `✓ Pas de coordination nécessaire (${total}/${maxScore})`;
+      }
+    }
+  }
+
+  /* ── Submit → adds PDF to chat ── */
+  function submitForm() {
+    const total = Object.keys(scores).reduce((a,k)=>a+scores[k],0);
+    const maxScore = isPregnant ? 28 : 26;
+    const threshold = isPregnant ? 14 : 13;
+    const isRequired = total >= threshold;
+
+    // Build PDF content
+    buildPdf(total, maxScore, isRequired);
+
+    // Close modal
+    document.getElementById('escapBackdrop').classList.remove('visible');
+
+    // Append PDF attachment to chat
+    addPdfToChat(total, maxScore, isRequired);
+
+    // Toast
+    showToast(`Grille ESCAP envoyée à Dr. MARTIN`);
+
+    setStep(3);
+  }
+
+  function addPdfToChat(total, maxScore, isRequired) {
+    const area = document.getElementById('messagesArea');
+    // Remove the hint system-message if present
+    const hint = area.querySelector('.system-message + .system-message, .system-message:last-of-type');
+    // Actually easier: find blue hint via color
+    const blueHints = area.querySelectorAll('.system-message');
+    blueHints.forEach(el => { if (el.style.background) el.remove(); });
+
+    // Build sent message group with PDF attachment
+    const group = document.createElement('div');
+    group.className = 'message-group';
+    group.innerHTML = `
+      <div class="message-sent">
+        <div class="message-sent-content">
+          <div class="message-sent-bubble" style="padding: 8px; background: transparent; border: none;">
+            <div class="pdf-attachment" onclick="openPdfPreview()" style="min-width: 320px;">
+              <div class="pdf-icon">PDF</div>
+              <div class="pdf-meta">
+                <div class="pdf-filename">ESCAP_DUPONT_Jean_21-04-2026.pdf</div>
+                <div class="pdf-details">
+                  <span>${isRequired ? '3 pages' : '3 pages'} · 148 Ko</span>
+                  <span class="pdf-score-chip" style="${isRequired ? '' : 'background: var(--dtl-success-bg); color: var(--dtl-success-text);'}">
+                    ${isRequired ? '⚠️' : '✓'} ${total}/${maxScore}
+                  </span>
+                </div>
+              </div>
+              <div class="pdf-action-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="message-time">14:32<span class="message-read-status">✓</span></div>
+        </div>
+      </div>
+    `;
+    area.appendChild(group);
+
+    // Add an accompanying text bubble
+    const textGroup = document.createElement('div');
+    textGroup.className = 'message-group';
+    textGroup.innerHTML = `
+      <div class="message-sent">
+        <div class="message-sent-content">
+          <div class="message-sent-bubble">Bonjour Docteur, je vous transmets la grille ESCAP pour Mr. DUPONT. ${isRequired ? 'Score au-dessus du seuil — pouvons-nous organiser une coordination ?' : 'Score en dessous du seuil, pas de coordination nécessaire pour le moment.'}</div>
+          <div class="message-time">14:32<span class="message-read-status">✓</span></div>
+        </div>
+      </div>
+    `;
+    area.appendChild(textGroup);
+
+    // Update preview line on left
+    document.getElementById('previewLine').textContent = `Vous: ESCAP_DUPONT_Jean_21-04-2026.pdf`;
+
+    // Scroll to bottom
+    area.scrollTop = area.scrollHeight;
+  }
+
+  /* ── PDF preview ── */
+  function openPdfPreview() {
+    document.getElementById('pdfPreview').classList.add('visible');
+    setStep(5);
+  }
+  function closePdfPreview() {
+    document.getElementById('pdfPreview').classList.remove('visible');
+    setStep(4);
+  }
+
+  function buildPdf(total, maxScore, isRequired) {
+    // Score banner
+    const banner = document.getElementById('pdfScoreBanner');
+    const num = document.getElementById('pdfScoreNum');
+    const title = document.getElementById('pdfScoreTitle');
+    const desc = document.getElementById('pdfScoreDesc');
+    num.textContent = `${total}/${maxScore}`;
+    if (isRequired) {
+      banner.style.background = 'var(--dtl-danger-bg)';
+      banner.style.borderLeftColor = '#DC2626';
+      num.style.color = 'var(--dtl-danger-text)';
+      title.style.color = 'var(--dtl-danger-text)';
+      title.textContent = 'Coordination requise';
+      desc.textContent = `Score ≥ ${isPregnant ? 14 : 13}/${maxScore} — Un plan de coordination multidisciplinaire est recommandé pour ce patient.`;
+    } else {
+      banner.style.background = 'var(--dtl-success-bg)';
+      banner.style.borderLeftColor = '#4CAF50';
+      num.style.color = 'var(--dtl-success-text)';
+      title.style.color = 'var(--dtl-success-text)';
+      title.textContent = 'Pas de coordination nécessaire';
+      desc.textContent = `Score < ${isPregnant ? 14 : 13}/${maxScore} — Suivi habituel. Réévaluation conseillée sous 3 mois.`;
+    }
+
+    // Prereq list
+    const prereqList = document.getElementById('pdfPrereqList');
+    prereqList.innerHTML = '';
+    Object.keys(prereqLabels).forEach(k => {
+      const ans = prereqs[k] || 'non';
+      const li = document.createElement('li');
+      li.innerHTML = `${prereqLabels[k]}<span class="answer ${ans === 'oui' ? 'yes' : 'no'}">${ans === 'oui' ? 'Oui' : 'Non'}</span>`;
+      prereqList.appendChild(li);
+    });
+
+    // Score table
+    const tbody = document.getElementById('pdfScoreTableBody');
+    tbody.innerHTML = '';
+    const scoreKeys = ['s_interv','s_age','s_patho','s_meds','s_hospi','s_chir','s_vuln','s_aide','s_mobi','s_cont','s_poids','s_sens','s_cogn'];
+    if (isPregnant) scoreKeys.push('s_gross');
+    scoreKeys.forEach(k => {
+      const val = scores[k];
+      const info = scoreKeyInfo[k];
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="criterion">${info.label}</td>
+        <td class="answer">${val !== undefined ? info.opts[val] : '—'}</td>
+        <td class="pts">${val !== undefined ? val : '—'}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('pdfTotalScore').textContent = total;
+    document.getElementById('pdfTotalMax').textContent = maxScore;
+
+    // Random ref num
+    document.getElementById('pdfRefNum').textContent = String(Math.floor(Math.random() * 900000) + 100000);
+  }
+
+  /* ── Toast ── */
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.add('visible');
+    setTimeout(() => t.classList.remove('visible'), 2800);
+  }
+
+  /* ── Stepper (prev/next manual navigation) ── */
+  const stepLabels = [
+    '',
+    '1 / 5 — Patient attaché',
+    '2 / 5 — Grille ESCAP',
+    '3 / 5 — Envoi en cours',
+    '4 / 5 — PDF joint au fil',
+    '5 / 5 — Aperçu du PDF',
+  ];
+
+  function setStep(n) {
+    currentStep = n;
+    document.getElementById('stepLabel').textContent = stepLabels[n];
+    document.getElementById('prevStep').disabled = n <= 1;
+    document.getElementById('nextStep').disabled = n >= 5;
+  }
+
+  function goStep(delta) {
+    const next = currentStep + delta;
+    if (next < 1 || next > 5) return;
+
+    if (delta > 0) {
+      // Going forward
+      if (next === 2) openEscapModal();
+      else if (next === 3) {
+        // Auto-fill and submit demo
+        if (Object.keys(scores).length === 0) demoFill();
+        submitForm();
+      }
+      else if (next === 4) {
+        // already there after submit
+        setStep(4);
+      }
+      else if (next === 5) openPdfPreview();
+    } else {
+      // Going backward
+      if (next === 4) {
+        // Hide PDF preview, stay on chat
+        document.getElementById('pdfPreview').classList.remove('visible');
+        setStep(4);
+      } else if (next === 3) {
+        // no-op — step 3 is transient; drop to 4
+        setStep(3);
+      } else if (next === 2) {
+        // Reopen modal
+        document.getElementById('escapBackdrop').classList.add('visible');
+        setStep(2);
+      } else if (next === 1) {
+        // Reset to initial state
+        resetAll();
+      }
+    }
+  }
+
+  function demoFill() {
+    // A realistic fill consistent with an elderly polypathological patient
+    setPrereqByKey('p1', 'non');
+    setPrereqByKey('p2', 'non');
+    setPrereqByKey('p3', 'non');
+    setPrereqByKey('p4', 'oui');
+    selectByKey('s_interv', 1);
+    selectByKey('s_age', 2);
+    selectByKey('s_patho', 2);
+    selectByKey('s_meds', 2);
+    selectByKey('s_hospi', 1);
+    selectByKey('s_chir', 0);
+    selectByKey('s_vuln', 1);
+    selectByKey('s_aide', 0);
+    selectByKey('s_mobi', 1);
+    selectByKey('s_cont', 1);
+    selectByKey('s_poids', 1);
+    selectByKey('s_sens', 1);
+    selectByKey('s_cogn', 2);
+  }
+
+  function setPrereqByKey(key, val) {
+    const item = document.querySelector(`[onclick*="'${key}'"]`);
+    const wrap = document.querySelectorAll('.prereq-item');
+    wrap.forEach(w => {
+      const btns = w.querySelectorAll('.yn-btn');
+      btns.forEach(b => {
+        if (b.getAttribute('onclick').includes(`'${key}'`) && b.getAttribute('onclick').includes(`'${val}'`)) {
+          setPrereq(b, key, val);
+        }
+      });
+    });
+  }
+
+  function selectByKey(key, val) {
+    document.querySelectorAll('.score-row').forEach(row => {
+      if (row.getAttribute('data-key') === key) {
+        const opts = row.querySelectorAll('.score-option');
+        opts.forEach(o => {
+          const onclick = o.getAttribute('onclick') || '';
+          if (onclick.includes(`'${key}'`) && onclick.endsWith(`${val})`)) {
+            selectScore(o, key, val);
+          }
+        });
+      }
+    });
+  }
+
+  function resetAll() {
+    Object.keys(scores).forEach(k => delete scores[k]);
+    Object.keys(prereqs).forEach(k => delete prereqs[k]);
+    document.querySelectorAll('.score-option.selected').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.yn-btn.selected').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.row-score-badge').forEach(b => { b.textContent = '—'; b.classList.remove('scored'); });
+    document.getElementById('escapBackdrop').classList.remove('visible');
+    document.getElementById('pdfPreview').classList.remove('visible');
+    // Remove added chat items - keep only the original 3 initial blocks
+    const area = document.getElementById('messagesArea');
+    const original = Array.from(area.children).slice(0, 4); // separator + 2 system msgs + patient card... actually need to keep the first 4 elements
+    area.innerHTML = '';
+    original.forEach(el => area.appendChild(el));
+    // Re-add the hint
+    const hint = document.createElement('div');
+    hint.className = 'system-message';
+    hint.style.background = 'var(--dtl-blue-light)';
+    hint.style.color = 'var(--dtl-blue)';
+    hint.innerHTML = '💡 Lancez une grille ESCAP pour évaluer le besoin de coordination de ce patient.';
+    area.appendChild(hint);
+    document.getElementById('previewLine').innerHTML = `<span style="color: var(--dtl-gray-400);">Aucun message pour l'instant</span>`;
+    updateScore();
+    setStep(1);
+  }
+
+  // Initialize
+  setStep(1);
+</script>
+
+</body>
+</html>
